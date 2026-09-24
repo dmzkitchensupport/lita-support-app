@@ -1,0 +1,41 @@
+{
+  "packageId": "support.lita.app",
+  "host": "app.litasupport.com",
+  "name": "LiTa Support",
+  "launcherName": "LiTa Support",
+  "display": "standalone",
+  "themeColor": "#c68a3d",
+  "themeColorDark": "#c68a3d",
+  "navigationColor": "#c68a3d",
+  "navigationColorDark": "#c68a3d",
+  "backgroundColor": "#e8e8e6",
+  "enableNotifications": false,
+  "startUrl": "/index.html",
+  "iconUrl": "https://app.litasupport.com/icons/icon-512.png",
+  "maskableIconUrl": "https://app.litasupport.com/icons/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "lita-app-upload-key-2026"
+  },
+  "appVersionCode": 1,
+  "appVersion": "1",
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://app.litasupport.com/manifest.json",
+  "fallbackType": "customtabs",
+  "orientation": "portrait",
+  "minSdkVersion": 21,
+  "fingerprints": [
+    {
+      "name": "lita-app-upload-key-2026 (LiTa Support, generado 24 sep 2026 -- primera app unificada)",
+      "value": "47:FE:6A:3A:DF:8A:5B:79:D2:8F:F1:C5:64:B6:D0:E1:05:BD:D9:0D:E2:E6:BF:6E:1C:4F:63:D2:DB:92:7B:B2"
+    }
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "alphaDependencies": { "enabled": false },
+  "features": {}
+}

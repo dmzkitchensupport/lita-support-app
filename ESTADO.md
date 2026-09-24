@@ -57,7 +57,34 @@ cada portal sigue exactamente igual cuando el parámetro no viene.
 qa-bot ya existentes como GitHub Secrets en cada repo, mismas que usa `agente-qa.yml`/
 `smoke-login.yml` desde hace semanas.
 
+## 2026-09-24 — empaquetado para tiendas (en curso)
+
+**Hallazgo real antes de envolver nada**: `dmzkitchensupport.github.io` (el dominio raíz
+que servía este repo) ya lo usa `dmzkitchensupport/dmzkitchensupport.github.io`, un
+producto interno distinto ("Mystery Shopper Audit Platform") — Digital Asset Links de
+Android (`assetlinks.json`) SIEMPRE se verifica contra la raíz del dominio, así que no se
+puede envolver esta app sin invadir ese otro repo. Además la URL exponía literalmente
+"dmzkitchensupport" — viola la regla de nunca mostrar DMZ en superficie cliente-facing.
+
+**Corregido con dominio propio**: `app.litasupport.com` (subdominio de un dominio que
+Mario ya posee y controla, mismo usado para correo vía Zoho). Agregado `CNAME` al repo.
+**Bloqueador real, de Mario**: falta crear el registro DNS real —
+`CNAME app.litasupport.com -> dmzkitchensupport.github.io` — en el panel de Zoho DNS de
+litasupport.com. Sin este registro, `app.litasupport.com` no resuelve y el build de
+Bubblewrap (que valida contra la URL real) va a fallar.
+
+**Keystore real generado** (`lita-app-upload-key-2026`, RSA 2048, validez 10000 días),
+respaldado en `~/Backups/lita-support/keystores/lita-support-app-upload.keystore`
+(nunca en git), huella SHA-256 real extraída con `keytool` (Java instalado vía Homebrew
+en esta sesión, no estaba disponible antes) y reflejada en `twa-manifest.json`/
+`.well-known/assetlinks.json`. Secrets `ANDROID_KEYSTORE_BASE64`/
+`ANDROID_KEYSTORE_PASSWORD`/`ANDROID_KEY_ALIAS` ya cargados en GitHub. Workflow
+`build-android-twa.yml` copiado y adaptado del mismo patrón ya probado en
+`vitality-control`/`cdj-support`.
+
 **Bloqueadores**:
-- Ninguno técnico. Pendiente de Mario: decidir si esta URL (o un dominio propio) es la
-  que se envuelve con Bubblewrap/PWABuilder para las tiendas — este repo solo resuelve
-  el bloqueador de "una sola app para descargar", no genera el paquete de la tienda.
+- 🔴 DNS de Mario (arriba) — bloquea correr el build de Android con éxito.
+- iOS: sigue pendiente generar el proyecto Xcode vía PWABuilder — necesita la misma URL
+  real funcionando primero, y pasos que requieren la sesión/Apple ID de Mario en Xcode
+  (firma, Team, Archive, subida a App Store Connect) — no se puede automatizar del todo
+  sin su participación directa.

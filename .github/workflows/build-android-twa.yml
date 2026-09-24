@@ -1,0 +1,98 @@
+name: 📱 Build Android (TWA)
+
+# Empaqueta el login único de LiTa Support como app nativa de Android (Trusted Web
+# Activity, via Bubblewrap). Mismo patrón ya probado en vitality-control.github.io y
+# cdjsupport.github.io. SIN pasar por Google Play todavía -- produce un .apk firmado
+# listo para sideload directo, y un .aab listo para subir a Play Console. El firmado
+# usa una llave generada una sola vez (24 sep 2026) y guardada como secret de este repo
+# (ANDROID_KEYSTORE_BASE64/ANDROID_KEYSTORE_PASSWORD/ANDROID_KEY_ALIAS) -- NUNCA cambiar
+# esa llave una vez publicada la app, o Android deja de reconocer las actualizaciones
+# como la misma app.
+#
+# Requiere que app.litasupport.com ya resuelva (CNAME real) antes de correr con éxito --
+# Bubblewrap valida contra webManifestUrl real.
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - 'twa-manifest.json'
+      - '.github/workflows/build-android-twa.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configurar Bubblewrap sin wizard interactivo
+        run: |
+          JDK_ROOT="${JAVA_HOME%/Contents/Home}"
+          mkdir -p ~/.bubblewrap
+          printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JDK_ROOT" "$ANDROID_HOME" > ~/.bubblewrap/config.json
+          cat ~/.bubblewrap/config.json
+
+      - name: Restaurar keystore de firma (secret, nunca en el repo)
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android.keystore
+
+      - name: Construir y firmar el APK/AAB
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          printf 'y\ny\ny\ny\ny\n' | npx --yes @bubblewrap/cli build
+
+      - name: Verificar que se generaron los archivos esperados
+        run: |
+          ls -la app-release-signed.apk
+          ls -la app-release-bundle.aab || echo "(sin .aab, revisar log si se esperaba)"
+
+      - name: Publicar el APK en GitHub Pages (descarga pública real)
+        run: |
+          mkdir -p android
+          cp app-release-signed.apk android/lita-support.apk
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add android/lita-support.apk
+          git diff --staged --quiet && echo "sin cambios en el apk, nada que comitear" || \
+            git commit -m "Actualizar APK de Android descargable (build ${{ github.run_number }})"
+          git push || echo "push falló (probablemente ya lo empujó otra corrida en paralelo, no es fatal)"
+
+      - name: Borrar el keystore del workspace (ya cumplió su función en este job)
+        if: always()
+        run: rm -f android.keystore
+
+      - name: Subir como artifact de este run
+        uses: actions/upload-artifact@v4
+        with:
+          name: lita-support-android
+          path: |
+            app-release-signed.apk
+            app-release-bundle.aab
+          retention-days: 90
+
+      - name: Publicar como GitHub Release (link estable para descargar)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-v${{ github.run_number }}
+          name: LiTa Support para Android (build ${{ github.run_number }})
+          body: |
+            Instalación directa (todavía sin pasar por Google Play):
+            1. Descarga `app-release-signed.apk` en tu celular Android.
+            2. Ábrelo -- Android va a pedir permiso para "instalar apps de fuentes desconocidas", acéptalo solo para este archivo.
+            3. Instala. Listo.
+
+            El `.aab` es el archivo que se sube a Google Play cuando se decida activar esa cuenta.
+          files: |
+            app-release-signed.apk
+            app-release-bundle.aab
+          draft: false
+          prerelease: true

@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "support.lita.app",
+      "sha256_cert_fingerprints": [
+        "47:FE:6A:3A:DF:8A:5B:79:D2:8F:F1:C5:64:B6:D0:E1:05:BD:D9:0D:E2:E6:BF:6E:1C:4F:63:D2:DB:92:7B:B2"
+      ]
+    }
+  }
+]
