@@ -23,7 +23,39 @@ si la URL trae `?ssoEmail=`. Sin ese parámetro, el login de cada portal funcion
 exactamente igual que antes (mismo `rpc_login`, sin cambio de flujo) — ver ESTADO.md de
 cada uno de esos 2 repos para el detalle y la verificación de no-regresión.
 
-**Verificación real**: ver sección "Verificación real end-to-end" más abajo.
+## Verificación real end-to-end (24 sep 2026)
+
+**Despliegue**: repo público `dmzkitchensupport/lita-support-app`, GitHub Pages
+(branch `main`, raíz) — `https://dmzkitchensupport.github.io/lita-support-app/`.
+Confirmado con `curl` real: `index.html`/`manifest.json`/`sw.js`/`vendor/supabase.js`/
+`icons/icon-192.png` sirven HTTP 200.
+
+**Prueba real contra VK** (`scripts/verificar-sso.js` + `.github/workflows/
+verificar-sso.yml` en `vitality-control`, corrido vía `workflow_dispatch`, run
+`36019543183`, cuenta qa-bot real de ese repo — `LOGIN_EMAIL`/`LOGIN_PASSWORD`):
+Puppeteer real entró a esta página, metió correo+contraseña de la cuenta qa-bot de VK,
+y el log del job (evidencia objetiva, no resumen propio) confirma:
+```
+PASS: login único resolvió correctamente -> vitality-control.github.io/portal.html?ssoEmail=*** -- #login-email prellenado OK, 0 pageerrors.
+```
+(el correo real queda enmascarado `***` en el log porque GitHub Actions enmascara
+automáticamente cualquier valor que coincida con un secret registrado — el script en sí
+sí lo comparó contra el valor real antes de imprimir PASS).
+
+**Prueba real contra CDJ** (mismo script/workflow en `cdj-support`, run `36019558440`,
+cuenta qa-bot real de ese repo):
+```
+PASS: login único resolvió correctamente -> cdjsupport.github.io/portal.html?ssoEmail=*** -- #login-email prellenado OK, 0 pageerrors.
+```
+
+**No regresión del login normal**: `agente-qa.yml` (login real + apertura/cierre de
+turno + 44-45 módulos, SIN `ssoEmail`) corrió automáticamente en el push que agregó el
+prellenado, en ambos repos, y quedó en verde (`success`) — el flujo de login normal de
+cada portal sigue exactamente igual cuando el parámetro no viene.
+
+**Ninguna credencial de cliente real se usó** — ambas pruebas corrieron con las cuentas
+qa-bot ya existentes como GitHub Secrets en cada repo, mismas que usa `agente-qa.yml`/
+`smoke-login.yml` desde hace semanas.
 
 **Bloqueadores**:
 - Ninguno técnico. Pendiente de Mario: decidir si esta URL (o un dominio propio) es la
