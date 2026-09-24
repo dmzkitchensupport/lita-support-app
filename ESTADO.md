@@ -88,3 +88,26 @@ en esta sesión, no estaba disponible antes) y reflejada en `twa-manifest.json`/
   real funcionando primero, y pasos que requieren la sesión/Apple ID de Mario en Xcode
   (firma, Team, Archive, subida a App Store Connect) — no se puede automatizar del todo
   sin su participación directa.
+
+
+## 2026-09-24 (tarde) — DNS resuelto + build Android real
+
+**Bloqueador 🔴 de DNS: RESUELTO.** El DNS de litasupport.com NO está en el panel de Zoho
+DNS sino en el del registrador (OpenSRS/Tucows, manage.opensrs.net — liga desde Consola
+Zoho Mail > Dominios > litasupport.com). Ahí se creó CNAME app -> dmzkitchensupport.github.io.
+Registros existentes sin cambios (A raíz 76.76.21.21 y www -> Vercel; mail -> Zoho).
+Verificado: app.litasupport.com resuelve a las IPs de GitHub Pages; en Settings > Pages
+quedó "DNS check successful" y se activó Enforce HTTPS.
+
+**Hallazgo y corrección**: .well-known/assetlinks.json daba 404 porque Jekyll ignora
+carpetas que empiezan con punto. Se agregó .nojekyll en la raíz (commit 78ee4f0);
+verificado que https://app.litasupport.com/.well-known/assetlinks.json ya sirve el JSON.
+
+**Build Android**: build-android-twa.yml corrido vía workflow_dispatch, run #2
+(36059700304) en success (2m 23s), artefacto lita-support-android (1.54 MB).
+El run #1 falló antes de existir el DNS.
+
+**Pendientes que siguen**:
+- Publicar en Google Play Console (cuenta de Mario).
+- iOS vía PWABuilder/Xcode (sin cambio, requiere Apple ID de Mario).
+- Warnings no bloqueantes del workflow: actions en Node 20 y setup-java@v4 deprecado.
