@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>LiTa Support — Acceso</title>
+<meta name="description" content="Acceso único LiTa Support">
+<meta name="theme-color" content="#c68a3d">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<style>
+  :root{
+    --paper:#e8e8e6;
+    --paper-card:#f2f2f0;
+    --ink:#2a2a28;
+    --ink-soft:#6b6b66;
+    --amber:#c68a3d;
+    --amber-ink:#3a2a12;
+    --border:#c9c9c5;
+    --error:#a33d2a;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .ticket{
+    width:100%;
+    max-width:380px;
+    background:var(--paper-card);
+    border:1px solid var(--border);
+    box-shadow:0 1px 0 rgba(0,0,0,.03), 0 8px 24px rgba(0,0,0,.06);
+    padding:28px 24px 24px;
+  }
+  .ticket-head{
+    text-align:center;
+    border-bottom:1px dashed var(--border);
+    padding-bottom:18px;
+    margin-bottom:20px;
+  }
+  .ticket-head .brand{
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 6px;
+  }
+  .ticket-head h1{
+    font-size:17px;
+    margin:0;
+    font-weight:600;
+    letter-spacing:.02em;
+  }
+  .ticket-head .sub{
+    margin:8px 0 0;
+    font-size:12px;
+    color:var(--ink-soft);
+    line-height:1.5;
+  }
+  form{display:flex; flex-direction:column; gap:14px;}
+  label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--ink-soft);
+    display:block;
+    margin-bottom:6px;
+  }
+  input{
+    width:100%;
+    font-family:inherit;
+    font-size:14px;
+    padding:10px 12px;
+    background:#fff;
+    border:1px solid var(--border);
+    color:var(--ink);
+    outline:none;
+  }
+  input:focus{
+    border-color:var(--amber);
+    box-shadow:0 0 0 2px rgba(198,138,61,.18);
+  }
+  button{
+    margin-top:6px;
+    width:100%;
+    font-family:inherit;
+    font-size:13px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:12px;
+    background:var(--amber);
+    color:var(--amber-ink);
+    border:1px solid var(--amber);
+    cursor:pointer;
+    font-weight:600;
+  }
+  button:hover{filter:brightness(1.04);}
+  button:disabled{opacity:.55; cursor:default;}
+  .msg{
+    font-size:12.5px;
+    line-height:1.5;
+    padding:10px 12px;
+    border:1px solid transparent;
+    display:none;
+  }
+  .msg.show{display:block;}
+  .msg.error{
+    display:block;
+    color:var(--error);
+    border-color:var(--error);
+    background:rgba(163,61,42,.06);
+  }
+  .msg.info{
+    display:block;
+    color:var(--ink-soft);
+    border-color:var(--border);
+    background:rgba(0,0,0,.02);
+  }
+  .ticket-foot{
+    margin-top:20px;
+    padding-top:14px;
+    border-top:1px dashed var(--border);
+    text-align:center;
+    font-size:10.5px;
+    color:var(--ink-soft);
+    letter-spacing:.04em;
+  }
+</style>
+</head>
+<body>
+
+<div class="ticket">
+  <div class="ticket-head">
+    <p class="brand">LiTa Support</p>
+    <h1>Acceso único</h1>
+    <p class="sub">Un solo login. Te llevamos directo al portal de tu operación.</p>
+  </div>
+
+  <form id="login-form" autocomplete="on">
+    <div>
+      <label for="sso-email">Correo</label>
+      <input id="sso-email" name="email" type="email" autocomplete="username" placeholder="tu@correo.com" required>
+    </div>
+    <div>
+      <label for="sso-pass">Contraseña</label>
+      <input id="sso-pass" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+    </div>
+
+    <div id="sso-msg" class="msg"></div>
+
+    <button id="sso-btn" type="submit">Entrar</button>
+  </form>
+
+  <div class="ticket-foot">LiTa Support · acceso operativo</div>
+</div>
+
+<script src="./vendor/supabase.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';document.head.appendChild(s);"></script>
+<script>
+/* LiTa Support — Login Único (MVP de resolución, no SSO criptográfico)
+ *
+ * Alcance honesto (ver ESTADO.md / CLAUDE.md de este repo): esto NO emite ni verifica
+ * ningún token de sesión cross-domain. Dado correo+contraseña, prueba autenticar contra
+ * el backend real de Vitality Kitchen primero (rpc_login); si el servidor responde que
+ * la credencial es inválida, prueba contra el backend de Corazón de Jaguar. Al primero
+ * que sí valide, redirige a SU portal real con ?ssoEmail=<correo> para prellenar el
+ * campo de correo ahí (ver portal.html de cada repo) -- el usuario puede tener que
+ * confirmar su contraseña una vez más si la sesión no quedó activa por timing entre
+ * dominios distintos. Eso es aceptable para v1.
+ *
+ * Nunca revela a cuál cliente pertenece un correo cuando la credencial es inválida en
+ * ambos backends -- mismo mensaje genérico sin importar la causa real.
+ */
+
+var CLIENTES = [
+  {
+    nombre: 'vitality-control',
+    url: 'https://lvugrhyknlftfgcngajc.supabase.co',
+    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2dWdyaHlrbmxmdGZnY25nYWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNDIyNzYsImV4cCI6MjEwNDgxODI3Nn0.U7BzVwzmj1mpBIZ7gElljGhCiVlIBuXnuBFGVl5eYtA',
+    portal: 'https://vitality-control.github.io/portal.html'
+  },
+  {
+    nombre: 'cdjsupport',
+    url: 'https://kjvmdfzacpygzozcvlby.supabase.co',
+    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtqdm1kZnphY3B5Z3pvemN2bGJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNTAzODIsImV4cCI6MjEwNDgyNjM4Mn0.ldBJ28FxOqBMQnhqdZzRLWiLeb4w5ohouoaSn0eJF20',
+    portal: 'https://cdjsupport.github.io/portal.html'
+  }
+];
+
+var _clientes = {}; // cache de createClient() por nombre
+
+function _getClient(c){
+  if(_clientes[c.nombre]) return _clientes[c.nombre];
+  if(!window.supabase || !window.supabase.createClient) return null;
+  _clientes[c.nombre] = window.supabase.createClient(c.url, c.key);
+  return _clientes[c.nombre];
+}
+
+/* Mismo patrón que loginServidor() en portal.html de VK/CDJ (14 sep 2026): nunca
+ * devuelve null -- siempre distingue 'credencial' (el servidor sí respondió, la
+ * credencial es inválida) de 'sin_conexion' (no se pudo ni preguntar: timeout, red
+ * caída, cliente no inicializado). */
+function probarLogin(c, email, pass){
+  return new Promise(function(resolve){
+    var sb = _getClient(c);
+    if(!sb){ resolve({ok:false, motivo:'sin_conexion'}); return; }
+    var timeoutMarker = {_timeout:true};
+    var timeoutP = new Promise(function(res){ setTimeout(function(){ res(timeoutMarker); }, 10000); });
+    Promise.race([sb.rpc('rpc_login', {p_email: email, p_pass: pass}), timeoutP])
+      .then(function(r){
+        if(r === timeoutMarker){ resolve({ok:false, motivo:'sin_conexion'}); return; }
+        if(r.error || !r.data){ resolve({ok:false, motivo:'sin_conexion'}); return; }
+        if(!r.data.ok){ resolve({ok:false, motivo:'credencial'}); return; }
+        resolve({ok:true, cliente:c});
+      })
+      .catch(function(){ resolve({ok:false, motivo:'sin_conexion'}); });
+  });
+}
+
+document.getElementById('login-form').addEventListener('submit', async function(ev){
+  ev.preventDefault();
+  var email = document.getElementById('sso-email').value.trim().toLowerCase();
+  var pass  = document.getElementById('sso-pass').value;
+  var msg   = document.getElementById('sso-msg');
+  var btn   = document.getElementById('sso-btn');
+  msg.className = 'msg';
+  msg.textContent = '';
+  if(!email || !pass) return;
+
+  btn.disabled = true;
+  var textoOriginal = btn.textContent;
+  btn.textContent = 'Verificando…';
+
+  try{
+    if(!window.supabase){
+      // Da un respiro corto por si el script self-hosted/CDN todavía está cargando.
+      await new Promise(function(res){ setTimeout(res, 300); });
+    }
+
+    var motivos = [];
+    var exito = null;
+    for(var i=0;i<CLIENTES.length;i++){
+      var r = await probarLogin(CLIENTES[i], email, pass);
+      if(r.ok){ exito = CLIENTES[i]; break; }
+      motivos.push(r.motivo);
+    }
+
+    if(exito){
+      msg.className = 'msg info show';
+      msg.textContent = 'Verificado. Entrando…';
+      window.location = exito.portal + '?ssoEmail=' + encodeURIComponent(email);
+      return;
+    }
+
+    var todosSinConexion = motivos.length && motivos.every(function(m){ return m === 'sin_conexion'; });
+    if(todosSinConexion){
+      msg.className = 'msg error show';
+      msg.textContent = 'No se pudo verificar tu contraseña ahora mismo (revisa tu conexión) — intenta de nuevo.';
+    } else {
+      msg.className = 'msg error show';
+      msg.textContent = 'Correo o contraseña incorrectos.';
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = textoOriginal;
+  }
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "LiTa Support",
+  "short_name": "LiTa Support",
+  "description": "Acceso único LiTa Support — resuelve el cliente real (Vitality Kitchen / Corazón de Jaguar) por correo y contraseña",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#e8e8e6",
+  "theme_color": "#c68a3d",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
