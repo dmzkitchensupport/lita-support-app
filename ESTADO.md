@@ -189,12 +189,22 @@ ninguna de las 7 decisiones bloqueadas de Fase 2.
 
 **Verificación real**:
 - `node --check` sobre el `<script>` inline extraído de `index.html`: verde.
-- `node --check` sobre los 2 `verificar-sso.js` editados: verde.
-- `verificar-sso.yml` corrido vía `workflow_dispatch` en VK y CDJ contra producción ya
-  desplegada con la piel nueva — ver resultado (run IDs) en el mensaje de cierre de esta
-  sesión / reporte al usuario.
-- Captura real del deploy a 390×844 comparada contra `01welcome.png`/`02login.png` — ver
-  mismo reporte.
+- `node --check` sobre los 2 `verificar-sso.js` editados (en `vitality-control`/
+  `cdj-support`): verde.
+- Deploy real confirmado en `app.litasupport.com` (GitHub Pages build de este repo,
+  commit `ba13aa7`) antes de correr las pruebas.
+- `verificar-sso.yml` corrido vía `workflow_dispatch` contra la producción ya desplegada
+  con la piel nueva:
+  - VK, run `36199521600`: `PASS: login único resolvió correctamente ->
+    vitality-control.github.io/portal.html?ssoEmail=*** -- #login-email prellenado OK,
+    0 pageerrors.`
+  - CDJ, run `36199523586`: `PASS: login único resolvió correctamente ->
+    cdjsupport.github.io/portal.html?ssoEmail=*** -- #login-email prellenado OK,
+    0 pageerrors.`
+- Captura real de `app.litasupport.com` a 390×844 (Puppeteer + Chrome real, no mockup):
+  0 `pageerror`, sin scroll horizontal en ninguna de las 2 pantallas, layout equivalente
+  a `01welcome.png`/`02login.png` (anillos concéntricos, tarjeta blanca con CTA ocre,
+  header con flecha+"PASO 1 DE 2", campos y botón anclados al fondo de la pantalla).
 
 **Qué sigue**: esperar la respuesta de Mario sobre el bloqueador de Permisos; Fase 2
 (portales VK/CDJ) sigue sin VoBo, no se toca.
