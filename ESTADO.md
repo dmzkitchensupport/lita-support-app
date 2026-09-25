@@ -136,3 +136,65 @@ desborde.
 - Correo de privacidad sin buzón verificado en Zoho (las páginas llevan placeholder
   visible `[CORREO DE PRIVACIDAD]`); el canal que funciona hoy es el escrito al domicilio.
 - La eliminación es un proceso manual; no hay RPC de borrado real ni botón dentro de la app.
+
+## 2026-09-25 — Fase 1 del encargo de diseño "D homologada" (reskin visual, login único)
+
+**Fuente**: `~/DMZ/lita-design-handoff/HANDOFF.md`, decisión de Mario 25 sep 2026. Fase 0
+(mapeo) ya hecha en `vitality-control`/`cdj-support`; esta Fase 1 es solo este repo
+(login único), cambio chico y aislado, no depende de las 7 decisiones de producto que
+bloquean la Fase 2 de los portales (esas siguen sin tocar).
+
+**Qué se construyó**:
+1. **Pantalla de Bienvenida** (`#screen-welcome`, nueva) — fondo `--lita-tinta`, anillos
+   concéntricos, ícono de marca (cuadrado carbón con 2 cuadros blancos + 1 punto ocre),
+   wordmark "LiTa" (la "a" en ocre) + "SUPPORT" en tracking amplio, tarjeta blanca con el
+   titular ("Todo lo que pasa en tu turno, **queda escrito**." — resaltado en
+   `--lita-ocre-texto`, nunca ocre puro sobre blanco) y botón "Entrar a mi operación".
+2. **Acceso único** (`#screen-login`, reskin del formulario existente) — header con
+   flecha atrás + "PASO 1 DE 2" en ocre, título y subtítulo iguales a los que ya existían,
+   campos con fondo `--lita-superficie-2`/radio `--lita-r-md`, botón "Entrar" de
+   `--lita-boton` (54px). **La lógica NO se tocó**: mismo `rpc_login`, misma resolución
+   VK→CDJ en el mismo orden, mismos mensajes de error genéricos — el único archivo con
+   lógica (`<script>` inline) se dejó carácter por carácter igual, solo se agregó al
+   final un listener nuevo que alterna `classList` entre las dos pantallas (no toca
+   `probarLogin`/`CLIENTES`/el `submit` del formulario).
+3. Los enlaces "Aviso de privacidad"/"Eliminar mi cuenta" se conservaron con las mismas
+   URLs de la sección anterior (`https://litasupport.com/privacidad` /
+   `.../eliminar-cuenta`, `target="_blank" rel="noopener"`) — verificadas contra el
+   `index.html` real antes de tocar nada (se hizo `git pull` primero: el checkout local
+   estaba 2 commits atrás de origin/main, que ya traía estos enlaces de un PR de una
+   sesión paralela).
+4. `tokens.css` del paquete de encargo se copió sin modificar a este repo y se enlaza
+   desde `index.html` — es la única fuente de valores de color/tipografía/radios/medidas.
+5. `CLAUDE.md` actualizado (sección "Estilo visual") con la decisión real y la cita de
+   la fuente.
+
+**🔴 Bloqueador — Pantalla de Permisos (`03perms.png`) NO SE CONSTRUYÓ**: este repo (login
+único) no pide permisos de cámara/ubicación/micrófono hoy, ni tiene un punto natural
+donde pedirlos — eso ocurre en el portal real de VK/CDJ, no aquí. Pregunta para Mario:
+**¿la pantalla de permisos aplica en otro punto del flujo (ej. justo antes de redirigir
+al portal real) o se retira del alcance de este repo?** No se implementó sin esa
+respuesta (regla 4 de Gobernanza DMZA).
+
+**Efecto colateral necesario, fuera de este repo pero documentado aquí**: el login único
+ahora requiere un clic en "Entrar a mi operación" antes de que `#sso-email`/`#sso-btn`
+sean interactuables por un usuario real — el script `scripts/verificar-sso.js` de
+`vitality-control` y `cdj-support` (vive en esos repos porque ahí están los secrets
+`LOGIN_EMAIL`/`LOGIN_PASSWORD` de las cuentas qa-bot) hacía `page.click('#sso-btn')`
+directo tras `page.goto()`, lo que habría fallado con la pantalla de bienvenida encima
+(el botón no tiene bounding box mientras su pantalla no esté activa). Se agregó un paso
+mecánico de 4 líneas en ambos scripts (`if (welcomeCta) await welcomeCta.click();`,
+gracioso si no existe) — no se tocó nada más de esos 2 repos, ni `portal.html`, ni
+ninguna de las 7 decisiones bloqueadas de Fase 2.
+
+**Verificación real**:
+- `node --check` sobre el `<script>` inline extraído de `index.html`: verde.
+- `node --check` sobre los 2 `verificar-sso.js` editados: verde.
+- `verificar-sso.yml` corrido vía `workflow_dispatch` en VK y CDJ contra producción ya
+  desplegada con la piel nueva — ver resultado (run IDs) en el mensaje de cierre de esta
+  sesión / reporte al usuario.
+- Captura real del deploy a 390×844 comparada contra `01welcome.png`/`02login.png` — ver
+  mismo reporte.
+
+**Qué sigue**: esperar la respuesta de Mario sobre el bloqueador de Permisos; Fase 2
+(portales VK/CDJ) sigue sin VoBo, no se toca.

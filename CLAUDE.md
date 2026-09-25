@@ -71,9 +71,20 @@ distinto ("no se pudo verificar tu conexión") al caso donde al menos un backend
 respondió que la credencial es inválida ("correo o contraseña incorrectos").
 
 ## Estilo visual
-"Placa de Cocina" — ticket paper gris `#e8e8e6`, tipografía monoespaciada
-(`ui-monospace`/Menlo/Consolas), ámbar `#c68a3d` como único acento, sin emojis. Mismo
-lenguaje elegido por Mario para superficies operativas de LiTa Support.
+**Decisión de Mario, 25 sep 2026** (`~/DMZ/lita-design-handoff/HANDOFF.md`): se adopta la
+dirección visual **"D homologada"** para esta pantalla, en reemplazo del estilo anterior
+("Placa de Cocina" — ticket paper gris `#e8e8e6`, tipografía monoespaciada). Fuente única
+de valores: `tokens.css` (copiado sin modificar del paquete de encargo, enlazado desde
+`index.html`) — tinta `#15181A`, carbón `#2A2E30`, un solo acento ocre `#C68A3D` (texto
+ocre siempre `--lita-ocre-texto` `#8A5A1E`, nunca `#C68A3D` sobre blanco), tipografía del
+sistema (`-apple-system`/SF Pro Text/Helvetica Neue — se retira la monoespaciada de esta
+pantalla), radios 12/14/16/18/22px, margen lateral 20px, botón primario 54px, sin emojis.
+Dos pantallas reales: **Bienvenida** (`#screen-welcome`, fondo `--lita-tinta`, wordmark
+"LiTa" con la "a" en ocre) y **Acceso único** (`#screen-login`, reskin del formulario
+existente — mismo `rpc_login`, misma resolución VK→CDJ, mismos mensajes de error, solo
+cambió la piel). El toggle entre ambas es JS puro (`classList`), sin tocar la lógica de
+login. La pantalla de permisos (`03perms.png`) del mismo encargo **no se implementó aquí**
+— ver bloqueador en `ESTADO.md`.
 
 ## Reglas de trabajo
 1. **Nunca cambiar el flujo de `rpc_login` real** de VK/CDJ desde este repo — solo se

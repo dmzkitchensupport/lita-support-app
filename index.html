@@ -5,182 +5,262 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>LiTa Support — Acceso</title>
 <meta name="description" content="Acceso único LiTa Support">
-<meta name="theme-color" content="#c68a3d">
+<meta name="theme-color" content="#15181A">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icons/icon-192.png">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="stylesheet" href="./tokens.css">
 <style>
+  /* LiTa Support — Login Único · piel "D homologada" (decisión de Mario, 25 sep 2026,
+     ver ~/DMZ/lita-design-handoff/HANDOFF.md). Fuente única de valores: tokens.css.
+     Dos valores puntuales de este prototipo no están en tokens.css (el tono apagado
+     de "SUPPORT" sobre fondo oscuro y el radio de 28px de la tarjeta de bienvenida) —
+     se tomaron literal del lienzo fuente (Prototipo.dc.html) por ser más específicos
+     que el token genérico más cercano. Ningún otro valor se inventó. */
   :root{
-    --paper:#e8e8e6;
-    --paper-card:#f2f2f0;
-    --ink:#2a2a28;
-    --ink-soft:#6b6b66;
-    --amber:#c68a3d;
-    --amber-ink:#3a2a12;
-    --border:#c9c9c5;
-    --error:#a33d2a;
+    --muted-on-dark:#9AA09C;
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
   body{
     margin:0;
-    background:var(--paper);
-    color:var(--ink);
-    font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    background:var(--lita-superficie-2);
+    font-family:var(--lita-fuente);
+    color:var(--lita-tinta);
     display:flex;
-    align-items:center;
     justify-content:center;
-    padding:24px;
+    min-height:100dvh;
   }
-  .ticket{
+  .app{
     width:100%;
-    max-width:380px;
-    background:var(--paper-card);
-    border:1px solid var(--border);
-    box-shadow:0 1px 0 rgba(0,0,0,.03), 0 8px 24px rgba(0,0,0,.06);
-    padding:28px 24px 24px;
+    max-width:480px;
+    min-height:100dvh;
+    position:relative;
+    background:#FFFFFF;
   }
-  .ticket-head{
-    text-align:center;
-    border-bottom:1px dashed var(--border);
-    padding-bottom:18px;
-    margin-bottom:20px;
+  .screen{
+    display:none;
+    flex-direction:column;
+    min-height:100dvh;
+    width:100%;
+    position:relative;
   }
-  .ticket-head .brand{
-    font-size:11px;
-    letter-spacing:.14em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    margin:0 0 6px;
+  .screen.is-active{ display:flex; }
+
+  /* ---------- Bienvenida ---------- */
+  #screen-welcome{
+    background:var(--lita-tinta);
+    overflow:hidden;
   }
-  .ticket-head h1{
-    font-size:17px;
-    margin:0;
-    font-weight:600;
-    letter-spacing:.02em;
+  .welcome-ring{
+    position:absolute;
+    left:50%;
+    border-radius:50%;
+    transform:translateX(-50%);
   }
-  .ticket-head .sub{
-    margin:8px 0 0;
-    font-size:12px;
-    color:var(--ink-soft);
-    line-height:1.5;
+  .welcome-ring--outer{ top:90px; width:300px; height:300px; border:1px solid rgba(237,234,228,.12); }
+  .welcome-ring--inner{ top:140px; width:200px; height:200px; border:1px solid rgba(198,138,61,.35); }
+  .welcome-mark{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    padding-top:190px;
   }
-  form{display:flex; flex-direction:column; gap:14px;}
+  .welcome-mark span{
+    width:104px; height:104px;
+    border-radius:var(--lita-r-xl);
+    background:var(--lita-carbon);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 18px 40px rgba(0,0,0,.45);
+  }
+  .welcome-word{
+    position:relative;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    padding-top:30px;
+  }
+  .welcome-word b{
+    font-size:44px; font-weight:var(--lita-peso-titulo); letter-spacing:-0.035em; line-height:1;
+    color:var(--lita-crema);
+  }
+  .welcome-word b .accent{ color:var(--lita-ocre); }
+  .welcome-word .tag{
+    font-size:10px; letter-spacing:.46em; color:var(--muted-on-dark);
+  }
+  .welcome-card{
+    margin:auto 16px 16px 16px;
+    background:#FFFFFF;
+    border-radius:28px;
+    padding:26px 22px 22px 22px;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .welcome-card h1{
+    margin:0; font-size:28px; font-weight:var(--lita-peso-titulo);
+    letter-spacing:var(--lita-tracking-titulo); line-height:1.08;
+    color:var(--lita-tinta);
+  }
+  .welcome-card h1 .accent{ color:var(--lita-ocre-texto); }
+  .welcome-card p{ margin:0; font-size:14px; line-height:1.45; color:var(--lita-texto-2); }
+
+  .btn-primary{
+    height:var(--lita-boton);
+    border-radius:var(--lita-r-lg);
+    border:0;
+    background:var(--lita-ocre);
+    color:var(--lita-tinta);
+    font-family:inherit;
+    font-weight:800; font-size:15px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    cursor:pointer;
+    width:100%;
+  }
+  .btn-primary:hover{ filter:brightness(1.04); }
+  .btn-primary:disabled{ opacity:.55; cursor:default; }
+  #welcome-cta{ margin-top:8px; }
+
+  /* ---------- Acceso único ---------- */
+  #screen-login{ background:#FFFFFF; }
+  .login-header{
+    display:flex; align-items:center; gap:12px;
+    padding:18px 16px 0 16px;
+  }
+  .back-btn{
+    width:44px; height:44px; border-radius:22px; border:0;
+    background:var(--lita-superficie-2);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .eyebrow{
+    font-size:12px; font-weight:700; letter-spacing:var(--lita-tracking-eyebrow);
+    color:var(--lita-ocre-texto);
+  }
+  .login-body{
+    padding:0 var(--lita-margen) 24px var(--lita-margen);
+    display:flex; flex-direction:column; flex-grow:1;
+  }
+  .login-body > h1{
+    margin:24px 0 0 0; font-size:30px; font-weight:var(--lita-peso-titulo);
+    letter-spacing:var(--lita-tracking-titulo);
+    color:var(--lita-tinta);
+  }
+  .login-body > p.sub{
+    margin:8px 0 0 0; font-size:15px; line-height:1.45; color:var(--lita-texto-2);
+  }
+  form{ display:flex; flex-direction:column; flex-grow:1; gap:16px; padding-top:28px; }
   label{
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:.08em;
-    color:var(--ink-soft);
-    display:block;
-    margin-bottom:6px;
+    display:flex; flex-direction:column; gap:8px;
+    font-size:13px; font-weight:700; color:var(--lita-tinta);
   }
   input{
-    width:100%;
-    font-family:inherit;
-    font-size:14px;
-    padding:10px 12px;
-    background:#fff;
-    border:1px solid var(--border);
-    color:var(--ink);
+    height:54px;
+    border-radius:var(--lita-r-md);
+    border:1.5px solid var(--lita-linea);
+    background:var(--lita-superficie-2);
+    padding:0 16px;
+    font-size:16px; font-weight:400;
+    color:var(--lita-tinta);
     outline:none;
+    font-family:inherit;
+    width:100%;
   }
   input:focus{
-    border-color:var(--amber);
+    border-color:var(--lita-ocre);
     box-shadow:0 0 0 2px rgba(198,138,61,.18);
   }
-  button{
-    margin-top:6px;
-    width:100%;
-    font-family:inherit;
-    font-size:13px;
-    letter-spacing:.06em;
-    text-transform:uppercase;
-    padding:12px;
-    background:var(--amber);
-    color:var(--amber-ink);
-    border:1px solid var(--amber);
-    cursor:pointer;
-    font-weight:600;
-  }
-  button:hover{filter:brightness(1.04);}
-  button:disabled{opacity:.55; cursor:default;}
   .msg{
-    font-size:12.5px;
-    line-height:1.5;
-    padding:10px 12px;
-    border:1px solid transparent;
+    font-size:12.5px; line-height:1.5; padding:10px 12px;
+    border:1px solid transparent; border-radius:var(--lita-r-sm);
     display:none;
   }
-  .msg.show{display:block;}
+  .msg.show{ display:block; }
   .msg.error{
-    display:block;
-    color:var(--error);
-    border-color:var(--error);
-    background:rgba(163,61,42,.06);
+    display:block; color:var(--lita-rojo-texto);
+    border-color:var(--lita-rojo-borde);
+    background:var(--lita-rojo-suave);
   }
   .msg.info{
-    display:block;
-    color:var(--ink-soft);
-    border-color:var(--border);
-    background:rgba(0,0,0,.02);
+    display:block; color:var(--lita-texto-2);
+    border-color:var(--lita-linea);
+    background:var(--lita-superficie);
   }
-  .ticket-foot{
-    margin-top:20px;
-    padding-top:14px;
-    border-top:1px dashed var(--border);
-    text-align:center;
-    font-size:10.5px;
-    color:var(--ink-soft);
-    letter-spacing:.04em;
+  .login-spacer{ flex-grow:1; min-height:16px; }
+  .legal{
+    display:flex; justify-content:center; flex-wrap:wrap;
+    gap:6px 8px; padding-top:16px; font-size:12px; color:var(--lita-texto-2);
   }
-  .ticket-foot .legal{
-    display:flex;
-    justify-content:center;
-    flex-wrap:wrap;
-    gap:4px 8px;
-    margin-top:10px;
-    font-size:11.5px;
-  }
-  .ticket-foot .legal a{
-    color:var(--ink);
+  .legal a{
+    color:var(--lita-texto-2);
     text-decoration:underline;
-    text-decoration-color:var(--amber);
+    text-decoration-color:var(--lita-ocre);
     text-underline-offset:3px;
   }
 </style>
 </head>
 <body>
 
-<div class="ticket">
-  <div class="ticket-head">
-    <p class="brand">LiTa Support</p>
-    <h1>Acceso único</h1>
-    <p class="sub">Un solo login. Te llevamos directo al portal de tu operación.</p>
+<div class="app">
+
+  <div id="screen-welcome" class="screen is-active">
+    <div class="welcome-ring welcome-ring--outer"></div>
+    <div class="welcome-ring welcome-ring--inner"></div>
+    <div class="welcome-mark">
+      <span>
+        <svg width="72" height="72" viewBox="0 0 48 48" fill="none" aria-hidden="true" style="color:#EDEAE4">
+          <rect x="8" y="8" width="12" height="12" rx="3.2" fill="currentColor"></rect>
+          <rect x="24" y="8" width="12" height="12" rx="3.2" fill="currentColor"></rect>
+          <rect x="8" y="24" width="12" height="12" rx="3.2" fill="currentColor"></rect>
+          <rect x="24" y="24" width="12" height="12" rx="6" fill="#C68A3D"></rect>
+        </svg>
+      </span>
+    </div>
+    <div class="welcome-word">
+      <b>LiT<span class="accent">a</span></b>
+      <span class="tag">SUPPORT</span>
+    </div>
+    <div class="welcome-card">
+      <h1>Todo lo que pasa en tu turno, <span class="accent">queda escrito.</span></h1>
+      <p>Checklists, temperaturas e incidencias con hora, responsable y evidencia fotográfica.</p>
+      <button id="welcome-cta" class="btn-primary" type="button">Entrar a mi operación</button>
+    </div>
   </div>
 
-  <form id="login-form" autocomplete="on">
-    <div>
-      <label for="sso-email">Correo</label>
-      <input id="sso-email" name="email" type="email" autocomplete="username" placeholder="tu@correo.com" required>
+  <div id="screen-login" class="screen">
+    <header class="login-header">
+      <button id="login-back" class="back-btn" type="button" aria-label="Regresar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15181A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+      </button>
+      <span class="eyebrow">PASO 1 DE 2</span>
+    </header>
+
+    <div class="login-body">
+      <h1>Acceso único</h1>
+      <p class="sub">Un solo login. Te llevamos directo al portal de tu operación.</p>
+
+      <form id="login-form" autocomplete="on">
+        <div>
+          <label for="sso-email">Correo</label>
+          <input id="sso-email" name="email" type="email" autocomplete="username" placeholder="tu@correo.com" required>
+        </div>
+        <div>
+          <label for="sso-pass">Contraseña</label>
+          <input id="sso-pass" name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required>
+        </div>
+
+        <div id="sso-msg" class="msg"></div>
+
+        <div class="login-spacer"></div>
+
+        <button id="sso-btn" class="btn-primary" type="submit">Entrar</button>
+      </form>
+
+      <nav class="legal" aria-label="Privacidad">
+        <a href="https://litasupport.com/privacidad" target="_blank" rel="noopener">Aviso de privacidad</a>
+        <span aria-hidden="true">·</span>
+        <a href="https://litasupport.com/eliminar-cuenta" target="_blank" rel="noopener">Eliminar mi cuenta</a>
+      </nav>
     </div>
-    <div>
-      <label for="sso-pass">Contraseña</label>
-      <input id="sso-pass" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
-    </div>
-
-    <div id="sso-msg" class="msg"></div>
-
-    <button id="sso-btn" type="submit">Entrar</button>
-  </form>
-
-  <div class="ticket-foot">
-    <span>LiTa Support · acceso operativo</span>
-    <nav class="legal" aria-label="Privacidad">
-      <a href="https://litasupport.com/privacidad" target="_blank" rel="noopener">Aviso de privacidad</a>
-      <span aria-hidden="true">·</span>
-      <a href="https://litasupport.com/eliminar-cuenta" target="_blank" rel="noopener">Eliminar mi cuenta</a>
-    </nav>
   </div>
+
 </div>
 
 <script src="./vendor/supabase.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';document.head.appendChild(s);"></script>
@@ -299,6 +379,22 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.register('./sw.js').catch(function(){});
   });
 }
+
+/* Navegación Bienvenida <-> Acceso único -- solo alterna qué pantalla se ve (clase
+ * .is-active). No toca rpc_login ni la resolución VK/CDJ de arriba en absoluto. */
+(function(){
+  var wScreen = document.getElementById('screen-welcome');
+  var lScreen = document.getElementById('screen-login');
+  document.getElementById('welcome-cta').addEventListener('click', function(){
+    wScreen.classList.remove('is-active');
+    lScreen.classList.add('is-active');
+    document.getElementById('sso-email').focus();
+  });
+  document.getElementById('login-back').addEventListener('click', function(){
+    lScreen.classList.remove('is-active');
+    wScreen.classList.add('is-active');
+  });
+})();
 </script>
 </body>
 </html>
