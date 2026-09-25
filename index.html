@@ -133,6 +133,20 @@
     color:var(--ink-soft);
     letter-spacing:.04em;
   }
+  .ticket-foot .legal{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:4px 8px;
+    margin-top:10px;
+    font-size:11.5px;
+  }
+  .ticket-foot .legal a{
+    color:var(--ink);
+    text-decoration:underline;
+    text-decoration-color:var(--amber);
+    text-underline-offset:3px;
+  }
 </style>
 </head>
 <body>
@@ -159,7 +173,14 @@
     <button id="sso-btn" type="submit">Entrar</button>
   </form>
 
-  <div class="ticket-foot">LiTa Support · acceso operativo</div>
+  <div class="ticket-foot">
+    <span>LiTa Support · acceso operativo</span>
+    <nav class="legal" aria-label="Privacidad">
+      <a href="https://litasupport.com/privacidad" target="_blank" rel="noopener">Aviso de privacidad</a>
+      <span aria-hidden="true">·</span>
+      <a href="https://litasupport.com/eliminar-cuenta" target="_blank" rel="noopener">Eliminar mi cuenta</a>
+    </nav>
+  </div>
 </div>
 
 <script src="./vendor/supabase.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';document.head.appendChild(s);"></script>
