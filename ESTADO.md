@@ -82,9 +82,21 @@ en esta sesión, no estaba disponible antes) y reflejada en `twa-manifest.json`/
 `build-android-twa.yml` copiado y adaptado del mismo patrón ya probado en
 `vitality-control`/`cdj-support`.
 
-**Bloqueadores**:
-- 🔴 DNS de Mario (arriba) — bloquea correr el build de Android con éxito.
-- iOS: sigue pendiente generar el proyecto Xcode vía PWABuilder — necesita la misma URL
-  real funcionando primero, y pasos que requieren la sesión/Apple ID de Mario en Xcode
-  (firma, Team, Archive, subida a App Store Connect) — no se puede automatizar del todo
-  sin su participación directa.
+## 2026-09-25 — Android real, primer build exitoso
+
+DNS de Mario ya propagó (`app.litasupport.com` → `dmzkitchensupport.github.io`, HTTPS
+forzado, certificado emitido, confirmado con `curl` real). Build disparado
+(`workflow_dispatch`, run `36083772268`) — **éxito**: GitHub Release **`android-v3`**
+con `app-release-signed.apk` (946KB) y `app-release-bundle.aab` (1.04MB) reales,
+firmados con el keystore `lita-app-upload-key-2026`. Este es el primer artefacto
+instalable real de la app unificada LiTa Support.
+
+**Bloqueadores que quedan**:
+- Google Play Console: sin confirmar si Mario ya la pagó — sin eso no hay dónde subir
+  el `.aab` (el `.apk` sí se puede instalar directo/sideload ya mismo).
+- iOS: sigue pendiente generar el proyecto Xcode vía PWABuilder — la URL real ya existe
+  y funciona, así que esto ya se puede intentar. Requiere después la sesión/Apple ID de
+  Mario en Xcode (firma, Team, Archive, subida a App Store Connect) — no se puede
+  automatizar del todo sin su participación directa.
+- Nombre legal exacto de la entidad del Apple Developer Organization — sin confirmar.
+- `soporte@litasupport.com` — bandeja específica sin confirmar que exista en Zoho Mail.
