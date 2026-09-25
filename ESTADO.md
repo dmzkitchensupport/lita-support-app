@@ -120,3 +120,19 @@ con el keystore `lita-app-upload-key-2026`.
 - Nombre legal exacto de la entidad del Apple Developer Organization — sin confirmar.
 - `soporte@litasupport.com` — bandeja específica sin confirmar que exista en Zoho Mail.
 - Warnings no bloqueantes del workflow: actions en Node 20 y setup-java@v4 deprecado.
+
+## 2026-09-24 — Enlaces a aviso de privacidad y eliminación de cuenta
+
+**Qué cambió**: el pie del ticket de `index.html` ahora enlaza a
+`https://litasupport.com/privacidad` y `https://litasupport.com/eliminar-cuenta`
+(bloqueantes de Google Play: política enlazada dentro de la app y ruta de
+eliminación de cuenta). Solo marcado y CSS; el flujo de `rpc_login` no se tocó.
+`node --check` del script inline en verde; captura headless a 1280 y 400 px sin
+desborde.
+
+**Depende de**: PR de `proyecto-lita-support` que publica esas dos rutas (antes 404).
+
+**Bloqueadores abiertos**:
+- Correo de privacidad sin buzón verificado en Zoho (las páginas llevan placeholder
+  visible `[CORREO DE PRIVACIDAD]`); el canal que funciona hoy es el escrito al domicilio.
+- La eliminación es un proceso manual; no hay RPC de borrado real ni botón dentro de la app.
