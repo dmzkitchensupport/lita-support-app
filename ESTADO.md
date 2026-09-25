@@ -120,4 +120,3 @@ con el keystore `lita-app-upload-key-2026`.
 - Nombre legal exacto de la entidad del Apple Developer Organization — sin confirmar.
 - `soporte@litasupport.com` — bandeja específica sin confirmar que exista en Zoho Mail.
 - Warnings no bloqueantes del workflow: actions en Node 20 y setup-java@v4 deprecado.
->>>>>>> origin/main
