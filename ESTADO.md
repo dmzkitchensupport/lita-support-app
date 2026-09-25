@@ -82,16 +82,35 @@ en esta sesión, no estaba disponible antes) y reflejada en `twa-manifest.json`/
 `build-android-twa.yml` copiado y adaptado del mismo patrón ya probado en
 `vitality-control`/`cdj-support`.
 
-## 2026-09-25 — Android real, primer build exitoso
+## 2026-09-24 (tarde) — DNS resuelto + build Android real
 
-DNS de Mario ya propagó (`app.litasupport.com` → `dmzkitchensupport.github.io`, HTTPS
-forzado, certificado emitido, confirmado con `curl` real). Build disparado
-(`workflow_dispatch`, run `36083772268`) — **éxito**: GitHub Release **`android-v3`**
-con `app-release-signed.apk` (946KB) y `app-release-bundle.aab` (1.04MB) reales,
-firmados con el keystore `lita-app-upload-key-2026`. Este es el primer artefacto
-instalable real de la app unificada LiTa Support.
+**Nota de proceso**: esta sección la escribió una sesión paralela trabajando el mismo
+repo al mismo tiempo (Mario corre varias ventanas de Claude Code a la vez) — reconciliado
+aquí sin perder ninguna de las dos bitácoras.
 
-**Bloqueadores que quedan**:
+**Bloqueador 🔴 de DNS: RESUELTO.** El DNS de litasupport.com NO está en el panel de Zoho
+DNS sino en el del registrador (OpenSRS/Tucows, manage.opensrs.net — liga desde Consola
+Zoho Mail > Dominios > litasupport.com). Ahí se creó CNAME app -> dmzkitchensupport.github.io.
+Registros existentes sin cambios (A raíz 76.76.21.21 y www -> Vercel; mail -> Zoho).
+Verificado: app.litasupport.com resuelve a las IPs de GitHub Pages; en Settings > Pages
+quedó "DNS check successful" y se activó Enforce HTTPS.
+
+**Hallazgo y corrección**: .well-known/assetlinks.json daba 404 porque Jekyll ignora
+carpetas que empiezan con punto. Se agregó .nojekyll en la raíz (commit 78ee4f0);
+verificado que https://app.litasupport.com/.well-known/assetlinks.json ya sirve el JSON.
+
+**Build Android #2**: build-android-twa.yml corrido vía workflow_dispatch, run #2
+(36059700304) en success (2m 23s), artefacto lita-support-android (1.54 MB). El run #1
+falló antes de existir el DNS.
+
+## 2026-09-25 — Android real, build #3 (sesión distinta, mismo resultado)
+
+Corrido en paralelo a lo de arriba, sin saber todavía de ese trabajo — mismo resultado,
+sin conflicto real: run `36083772268` en success, GitHub Release **`android-v3`** con
+`app-release-signed.apk` (946KB) y `app-release-bundle.aab` (1.04MB) reales, firmados
+con el keystore `lita-app-upload-key-2026`.
+
+**Bloqueadores que quedan (consolidado de ambas sesiones)**:
 - Google Play Console: sin confirmar si Mario ya la pagó — sin eso no hay dónde subir
   el `.aab` (el `.apk` sí se puede instalar directo/sideload ya mismo).
 - iOS: sigue pendiente generar el proyecto Xcode vía PWABuilder — la URL real ya existe
@@ -100,3 +119,5 @@ instalable real de la app unificada LiTa Support.
   automatizar del todo sin su participación directa.
 - Nombre legal exacto de la entidad del Apple Developer Organization — sin confirmar.
 - `soporte@litasupport.com` — bandeja específica sin confirmar que exista en Zoho Mail.
+- Warnings no bloqueantes del workflow: actions en Node 20 y setup-java@v4 deprecado.
+>>>>>>> origin/main
