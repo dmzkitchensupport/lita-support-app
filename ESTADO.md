@@ -231,3 +231,16 @@ OK: selector apareció con 2 opciones: ["Vitality Kitchen→","Corazón de Jagua
 ```
 La prueba se detuvo ahí a propósito, sin hacer clic en ninguna opción, para no generar
 actividad real en `registro_actividad` de ningún portal con la cuenta real de Mario.
+
+**Reportado por Mario el mismo día desde su iPhone real: seguía yendo directo a VK**, pese
+a que la prueba de Puppeteer contra la misma URL ya mostraba el selector. Causa real
+encontrada: GitHub Pages sirve `index.html` con `cache-control:max-age=600` — un `fetch()`
+normal dentro del service worker respeta ese cache HTTP del navegador aunque la ESTRATEGIA
+sea "network-first" (confirmado con `curl -I`). Una recarga podía seguir sirviendo una
+copia de hasta 10 minutos vieja sin tocar la red de verdad — en un iPhone con la PWA ya
+instalada, esto se nota mucho más que recargando una pestaña normal de escritorio.
+Corregido: `fetch(event.request, {cache:'reload'})` fuerza ignorar el cache HTTP (no el
+de este Service Worker, que sigue siendo el respaldo intencional sin red). Se subió
+también la versión del cache (`v1`→`v2`) para purgar cualquier entrada vieja. Puppeteer no
+hubiera detectado este bug (cada corrida parte de un navegador/perfil nuevo, sin cache
+previo) — se necesitó el reporte real de un dispositivo con uso repetido para encontrarlo.
