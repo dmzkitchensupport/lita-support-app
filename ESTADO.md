@@ -208,3 +208,21 @@ ninguna de las 7 decisiones bloqueadas de Fase 2.
 
 **Qué sigue**: esperar la respuesta de Mario sobre el bloqueador de Permisos; Fase 2
 (portales VK/CDJ) sigue sin VoBo, no se toca.
+
+## 2026-10-01 — Selector multi-cliente (resuelve "me manda directo a VK")
+
+**Hallazgo real de Mario**: con una cuenta real que existe en VK y en CDJ a la vez (su
+propia cuenta admin, creada/actualizada el mismo día en ambos proyectos), el login único
+siempre terminaba en VK — el ciclo de resolución se detenía (`break`) en el PRIMER backend
+que validara, nunca llegaba a preguntar por el segundo. Esto ya estaba documentado como
+alcance honesto del MVP, pero ahora había un caso real que lo necesitaba.
+
+**Corregido**: el ciclo ya no se detiene en el primer éxito — prueba los dos backends
+siempre. Si valida en uno solo, el comportamiento es idéntico a antes (redirige directo).
+Si valida en los dos, muestra una pantalla nueva (`#screen-selector`, mismo sistema visual
+"D homologada") con un botón por cliente (`Vitality Kitchen` / `Corazón de Jaguar`) — el
+usuario elige a cuál entrar, y puede volver a entrar para elegir el otro cuando quiera.
+Sigue sin ser SSO real entre dominios (mismo alcance honesto de siempre).
+
+**Verificación real**: probado con la cuenta real de Mario (`mario@delamorazumaran.com`,
+válida en los dos proyectos desde hoy) — ver bitácora de commit para el resultado real.

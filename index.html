@@ -194,6 +194,36 @@
     text-decoration-color:var(--lita-ocre);
     text-underline-offset:3px;
   }
+
+  /* ---------- Selector multi-cliente (1 oct 2026) ---------- */
+  /* Solo aparece cuando el mismo correo+contraseña valida en más de un backend (ej. un
+   * admin/propietario con cuenta real en VK y en CDJ a la vez) -- antes de esto, el
+   * primero que validara ganaba siempre y nunca dejaba llegar al segundo. */
+  #screen-selector{ background:#FFFFFF; }
+  .selector-body{
+    padding:0 var(--lita-margen) 24px var(--lita-margen);
+    display:flex; flex-direction:column; flex-grow:1;
+  }
+  .selector-body > h1{
+    margin:24px 0 0 0; font-size:26px; font-weight:var(--lita-peso-titulo);
+    letter-spacing:var(--lita-tracking-titulo); color:var(--lita-tinta);
+  }
+  .selector-body > p.sub{
+    margin:8px 0 0 0; font-size:14px; line-height:1.45; color:var(--lita-texto-2);
+  }
+  .selector-lista{ display:flex; flex-direction:column; gap:10px; padding-top:24px; }
+  .selector-opt{
+    height:64px; width:100%;
+    border-radius:var(--lita-r-lg);
+    border:1.5px solid var(--lita-linea);
+    background:var(--lita-superficie);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 18px;
+    font-family:inherit; font-size:16px; font-weight:700; color:var(--lita-tinta);
+    cursor:pointer; text-align:left;
+  }
+  .selector-opt:hover{ border-color:var(--lita-ocre); background:var(--lita-ocre-suave); }
+  .selector-opt .arrow{ color:var(--lita-ocre-texto); font-weight:800; }
 </style>
 </head>
 <body>
@@ -261,6 +291,17 @@
     </div>
   </div>
 
+  <div id="screen-selector" class="screen">
+    <header class="login-header">
+      <span class="eyebrow">PASO 2 DE 2</span>
+    </header>
+    <div class="selector-body">
+      <h1>¿A cuál quieres entrar?</h1>
+      <p class="sub">Tu cuenta existe en más de un negocio. Elige uno — puedes volver a entrar para elegir el otro cuando quieras.</p>
+      <div class="selector-lista" id="selector-lista"></div>
+    </div>
+  </div>
+
 </div>
 
 <script src="./vendor/supabase.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';document.head.appendChild(s);"></script>
@@ -283,12 +324,14 @@
 var CLIENTES = [
   {
     nombre: 'vitality-control',
+    etiqueta: 'Vitality Kitchen',
     url: 'https://lvugrhyknlftfgcngajc.supabase.co',
     key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2dWdyaHlrbmxmdGZnY25nYWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNDIyNzYsImV4cCI6MjEwNDgxODI3Nn0.U7BzVwzmj1mpBIZ7gElljGhCiVlIBuXnuBFGVl5eYtA',
     portal: 'https://vitality-control.github.io/portal.html'
   },
   {
     nombre: 'cdjsupport',
+    etiqueta: 'Corazón de Jaguar',
     url: 'https://kjvmdfzacpygzozcvlby.supabase.co',
     key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtqdm1kZnphY3B5Z3pvemN2bGJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNTAzODIsImV4cCI6MjEwNDgyNjM4Mn0.ldBJ28FxOqBMQnhqdZzRLWiLeb4w5ohouoaSn0eJF20',
     portal: 'https://cdjsupport.github.io/portal.html'
@@ -345,18 +388,28 @@ document.getElementById('login-form').addEventListener('submit', async function(
       await new Promise(function(res){ setTimeout(res, 300); });
     }
 
+    // Bug real corregido 1 oct 2026: antes se detenía en el PRIMER backend que validara
+    // (break), así que una cuenta real que existe en los dos (ej. un admin con acceso a
+    // ambos negocios) siempre terminaba en el mismo -- nunca llegaba a preguntar por el
+    // segundo. Ahora se prueban los dos SIEMPRE, y solo si valida en más de uno se
+    // muestra el selector; si valida en uno solo, el comportamiento es idéntico a antes.
     var motivos = [];
-    var exito = null;
+    var exitos = [];
     for(var i=0;i<CLIENTES.length;i++){
       var r = await probarLogin(CLIENTES[i], email, pass);
-      if(r.ok){ exito = CLIENTES[i]; break; }
-      motivos.push(r.motivo);
+      if(r.ok){ exitos.push(CLIENTES[i]); }
+      else { motivos.push(r.motivo); }
     }
 
-    if(exito){
+    if(exitos.length === 1){
       msg.className = 'msg info show';
       msg.textContent = 'Verificado. Entrando…';
-      window.location = exito.portal + '?ssoEmail=' + encodeURIComponent(email);
+      window.location = exitos[0].portal + '?ssoEmail=' + encodeURIComponent(email);
+      return;
+    }
+
+    if(exitos.length > 1){
+      mostrarSelector(exitos, email);
       return;
     }
 
@@ -373,6 +426,24 @@ document.getElementById('login-form').addEventListener('submit', async function(
     btn.textContent = textoOriginal;
   }
 });
+
+/* Pantalla de selección cuando el mismo correo+contraseña validó en más de un backend. */
+function mostrarSelector(clientesValidos, email){
+  var lista = document.getElementById('selector-lista');
+  lista.innerHTML = '';
+  clientesValidos.forEach(function(c){
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'selector-opt';
+    btn.innerHTML = '<span>' + c.etiqueta + '</span><span class="arrow">→</span>';
+    btn.addEventListener('click', function(){
+      window.location = c.portal + '?ssoEmail=' + encodeURIComponent(email);
+    });
+    lista.appendChild(btn);
+  });
+  document.getElementById('screen-login').classList.remove('is-active');
+  document.getElementById('screen-selector').classList.add('is-active');
+}
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', function(){
