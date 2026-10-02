@@ -244,3 +244,26 @@ de este Service Worker, que sigue siendo el respaldo intencional sin red). Se su
 también la versión del cache (`v1`→`v2`) para purgar cualquier entrada vieja. Puppeteer no
 hubiera detectado este bug (cada corrida parte de un navegador/perfil nuevo, sin cache
 previo) — se necesitó el reporte real de un dispositivo con uso repetido para encontrarlo.
+
+## 2026-10-02 — Tercer tenant: demo de ventas "Fonda Raíz" (`lita-demo`)
+
+**Qué se agregó**: tercera entrada en `CLIENTES` (`nombre:'lita-demo'`,
+`etiqueta:'LiTa Support (Demo)'`) apuntando a un proyecto Supabase propio y aislado
+(`lita-demo`, ref `vyrbajxcvqhvageyxblg`, región `us-east-1`) — no comparte datos con VK
+ni CDJ. El portal real vive en `dmzkitchensupport/lita-demo` (repo nuevo, público,
+GitHub Pages), copia de `vitality-control/portal.html` (el más reciente con el rediseño
+"D homologada") con el branding reemplazado por un cliente **ficticio** ("Fonda Raíz" —
+no es un negocio real) y con datos de muestra sembrados (7 días de turnos/progreso/scores
+variados de A+ a C, 8 alertas resueltas/pendientes). Objetivo: que Mario pueda hacer demos
+en vivo a prospectos sin tocar nunca datos de VK/CDJ. Detalle completo, bloqueadores
+(sin email de alertas real — falta `RESEND_API_KEY`; sin Stripe/WhatsApp real a propósito)
+y qué sigue: ver `ESTADO.md` del repo `lita-demo`.
+
+**Verificación real**: `curl` a `https://dmzkitchensupport.github.io/lita-demo/portal.html`
+→ 200. `rpc_login` real contra el proyecto `lita-demo` con la cuenta
+`demo@litasupport.com` (rol admin) → `{"ok":true,...}`. Credenciales entregadas a Mario
+directo en el reporte de esta sesión, nunca en texto plano en ningún repo.
+
+**Con el selector multi-cliente (ver entrada 2026-10-01), una cuenta que exista en más
+de uno de los 3 backends ahora vería hasta 3 opciones** — sin cambio de lógica, el ciclo
+ya prueba todos los elementos de `CLIENTES` sin detenerse en el primero.
