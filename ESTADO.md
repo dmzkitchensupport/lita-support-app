@@ -224,5 +224,10 @@ Si valida en los dos, muestra una pantalla nueva (`#screen-selector`, mismo sist
 usuario elige a cuál entrar, y puede volver a entrar para elegir el otro cuando quiera.
 Sigue sin ser SSO real entre dominios (mismo alcance honesto de siempre).
 
-**Verificación real**: probado con la cuenta real de Mario (`mario@delamorazumaran.com`,
-válida en los dos proyectos desde hoy) — ver bitácora de commit para el resultado real.
+**Verificación real** (Puppeteer contra producción, `app.litasupport.com`, commit
+`bfbfa93` ya desplegado): login real con `mario@delamorazumaran.com` →
+```
+OK: selector apareció con 2 opciones: ["Vitality Kitchen→","Corazón de Jaguar→"]
+```
+La prueba se detuvo ahí a propósito, sin hacer clic en ninguna opción, para no generar
+actividad real en `registro_actividad` de ningún portal con la cuenta real de Mario.
