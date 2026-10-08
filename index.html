@@ -316,8 +316,8 @@
       <h1>Eliminar mi cuenta</h1>
       <p class="sub">Confirma que eres tú con el correo y la contraseña con los que entras a LiTa Support.</p>
       <ul class="elim-lista">
-        <li>Tu acceso se desactiva en cuanto envías la solicitud.</li>
-        <li>En 10 días se borran tu contraseña, tu PIN, tu firma de cierre y tu historial de inicio de sesión.</li>
+        <li>En cuanto envías la solicitud, ya no puedes iniciar sesión con esta cuenta. Si tienes la app abierta en otro teléfono, cierra sesión ahí también.</li>
+        <li>En 10 días se borran tu contraseña, tu PIN y tu historial de inicio de sesión, y tu nombre y correo se quitan de los registros.</li>
         <li>Los registros de operación (temperaturas, listas, turnos) se conservan sin tu nombre: son de tu empleador y algunos los exige la ley.</li>
       </ul>
       <form id="elim-form" autocomplete="on">
@@ -597,7 +597,7 @@ function solicitarEliminacion(c, email, pass, canal){
         form.innerHTML = '';
         var ok = document.createElement('div');
         ok.className = 'msg info show';
-        ok.innerHTML = '<strong>Solicitud registrada.</strong> Tu acceso ya quedó desactivado. La eliminación se ejecuta automáticamente el ' + fecha + '. Guarda tu folio:';
+        ok.innerHTML = '<strong>Solicitud registrada.</strong> Ya no puedes iniciar sesión con esta cuenta; si la tienes abierta en otro teléfono, cierra sesión ahí. La eliminación se ejecuta automáticamente el ' + fecha + '. Guarda tu folio:';
         form.appendChild(ok);
         exitos.forEach(function(x){
           var f = document.createElement('p'); f.className = 'elim-folio';

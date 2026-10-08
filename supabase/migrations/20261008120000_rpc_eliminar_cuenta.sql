@@ -15,9 +15,9 @@
 --   2. rpc_eliminar_cuenta_ejecutar_vencidas() -- pg_cron diario. Seudonimiza:
 --      el colaborador conserva su id (actor_colaborador_id intacto) y su nombre/correo
 --      pasan a "Colaborador #N · rol" en todos los registros operativos (NOM-251,
---      fiscales, turnos): se anonimizan, no se borran. Se BORRAN: credenciales, firma
---      de cierre (imagen), historial de inicio de sesión, reportes técnicos con su
---      correo y contadores de seguridad.
+--      fiscales, turnos): se anonimizan, no se borran. Se BORRAN: credenciales,
+--      historial de inicio de sesión, reportes técnicos con su correo, contadores de
+--      seguridad y la firma de cierre SOLO si su ruta exacta está registrada (ver 2a).
 --   3. Retención: update eliminacion_cuenta_solicitudes set estado='retenida',
 --      retener_motivo='...' where folio='...';  (la ejecución automática la salta).
 -- Sin correo directo al usuario ni al cliente: la alerta va solo a Mario (API web).
@@ -181,19 +181,24 @@ begin
   v_full  := btrim(coalesce(u.nombre, '') || ' ' || coalesce(u.apellido, ''));
   v_alias := 'Colaborador #' || s.id || ' · ' || coalesce(nullif(u.rol, ''), 'colaborador');
 
-  -- 2a. Firma de cierre (imagen): se borra. Se liga por registro_actividad
-  --     (foto_subida/contexto firma-cierre del mismo correo, mismo minuto).
+  -- 2a. Firma de cierre (imagen). Corrección de la revisión de Cla, 8 oct: NUNCA por
+  --     cercanía de tiempo (borraba firmas de otra persona que firmó en el mismo minuto).
+  --     Solo se borra el objeto cuya ruta EXACTA quedó registrada a nombre de este correo
+  --     en registro_actividad.detalle->>'path'. Al 8 oct, VK/CDJ guardan solo
+  --     {contexto, dispositivo} y la ruta es fecha/firma-cierre_<ms>.jpg sin owner ni
+  --     metadata: no hay liga exacta, así que hoy no se borra ninguna firma (se conservan
+  --     como evidencia del cierre del empleador). Para borrarlas, los portales deben
+  --     agregar `path` al detalle de sbInsertActividad('foto_subida', ...).
   if to_regclass('storage.objects') is not null and to_regclass('public.registro_actividad') is not null then
     perform set_config('storage.allow_delete_query', 'true', true);
     with f as (
       delete from storage.objects o
        where o.bucket_id = 'fotos-operativas'
-         and o.name like '%/firma-cierre\_%'
-         and exists (select 1 from registro_actividad ra
-                      where lower(ra.colaborador_email) = v_email
-                        and ra.accion = 'foto_subida'
-                        and ra.detalle::text like '%firma-cierre%'
-                        and abs(extract(epoch from (o.created_at - ra.created_at))) < 60)
+         and o.name in (select ra.detalle->>'path' from registro_actividad ra
+                         where lower(ra.colaborador_email) = v_email
+                           and ra.accion = 'foto_subida'
+                           and ra.detalle->>'contexto' = 'firma-cierre'
+                           and ra.detalle ? 'path')
       returning 1)
     select count(*) into v_firmas from f;
     perform set_config('storage.allow_delete_query', 'false', true);

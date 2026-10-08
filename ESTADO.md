@@ -289,9 +289,9 @@ despliega `main`; Mario cerró la laptop y Cla congeló deploys). Proceso deteni
   (RLS sin políticas; auditoría de solo inserción por trigger), `rpc_eliminar_cuenta_solicitar`
   (anon; verifica contraseña, límite 5 fallos/15 min), `rpc_eliminar_cuenta_ejecutar` y
   `rpc_eliminar_cuenta_ejecutar_vencidas` (sin grant a anon; pg_cron diario 08:15 CDMX),
-  `rpc_eliminar_cuenta_verificar_folio` (anon, sin PII). Se borran: contraseña, PIN, firma de
-  cierre (storage, ligada por `registro_actividad`), historial de login, `errores_cliente`,
-  `seguridad_intentos`. Se conservan seudonimizados: todos los registros operativos/NOM-251.
+  `rpc_eliminar_cuenta_verificar_folio` (anon, sin PII). Se borran: contraseña, PIN,
+  historial de login, `errores_cliente`, `seguridad_intentos`. Se conservan seudonimizados:
+  todos los registros operativos/NOM-251. Firma de cierre: ver corrección abajo.
 - `index.html`: pantalla `#screen-eliminar` dentro de la app (requisito de Google Play), abierta
   desde el enlace "Eliminar mi cuenta" del login o con `?eliminar=1` (a donde envía
   litasupport.com/eliminar-cuenta). Prueba todos los backends, no revela en cuál existe un
@@ -341,3 +341,42 @@ run 36083772268). iOS: proyecto Xcode con PWABuilder sin generar.
 **Qué sigue**: (1) aplicar migración en VK/CDJ; (2) fusionar esta rama y la de
 `proyecto-lita-support` (`feat/eliminar-cuenta-y-veracidad`); (3) QA real en VK/CDJ con
 cuenta `*@lita-support.internal`; (4) pre-pantalla de permisos en los portales.
+
+### 2026-10-08 (noche) — Correcciones de la revisión de Cla, misma rama
+
+**1. Bug corregido (bloqueaba la aplicación en VK/CDJ): borrado de firmas por cercanía de
+tiempo.** La versión anterior borraba de `storage.objects` TODA `firma-cierre` creada a
+<60 s de una `foto_subida` de firma del usuario eliminado. Si otra persona firmaba un
+cierre en ese mismo minuto (normal en cambio de turno), se destruía SU firma. Revisión de
+solo lectura en VK y CDJ (8 oct): `registro_actividad.detalle` de `foto_subida` solo trae
+`{contexto, dispositivo}`; la ruta es `AAAA-MM-DD/firma-cierre_<ms>.jpg`, sin `owner_id`
+ni `user_metadata`; `fotos` no tiene filas de firma. **No hay liga exacta firma→persona.**
+Nueva regla: solo se borra el objeto cuya ruta EXACTA esté en
+`registro_actividad.detalle->>'path'` a nombre del correo eliminado. Con los datos de hoy
+eso no borra ninguna firma: las firmas existentes se conservan como evidencia del cierre
+del empleador. La firma no es texto, así que no se puede seudonimizar. Los textos de la app ya no
+prometen borrar la firma.
+- **Especificación para `vitality-control`/`cdj-support`** (no se tocaron esos repos): en
+  `subirFotoStorage`, pasar la ruta al registro de actividad:
+  `sbInsertActividad('foto_subida', {contexto: contexto, path: path})`. Desde ese momento,
+  las firmas nuevas quedan ligadas por ruta exacta y la eliminación las borra.
+- **Prueba en demo con 2 cuentas QA que firmaron en el mismo minuto** (A eliminada, B
+  conservada, 5 s de diferencia, más una firma de A sin ruta registrada). Resultado de
+  `rpc_eliminar_cuenta_ejecutar_vencidas()`: `firmas_borradas: 1`. Quedaron
+  `firma-cierre_qa_B.jpg` (de B, intacta) y `firma-cierre_qa_A_legacy.jpg` (sin liga
+  exacta, conservada). Solo se borró `firma-cierre_qa_A.jpg`. B sigue activa con su
+  nombre; A quedó como "Colaborador #3 · colaborador". Datos de QA limpiados.
+
+**2. Sesiones ya abiertas en VK/CDJ.** `rpc_eliminar_cuenta_solicitar` pone `activo=false`,
+lo que bloquea iniciar sesión nueva (`rpc_login` exige `activo`). Pero los portales de VK y
+CDJ guardan la sesión en el dispositivo y **no vuelven a validar `activo` al cargar**: un
+teléfono con la sesión abierta sigue entrando hasta que se cierre sesión. Por eso la
+pantalla ya no dice "acceso desactivado de inmediato". Ahora dice "ya no puedes iniciar
+sesión con esta cuenta; si la tienes abierta en otro teléfono, cierra sesión ahí".
+- **Especificación para los portales**: al cargar `portal.html` con sesión guardada, llamar
+  `rpc_resolver_actor_por_email` (ya existe) o un RPC equivalente que regrese `activo`; si
+  la cuenta no existe o `activo=false`, borrar la sesión local y mandar al login. Cuando
+  esté en ambos portales, se puede volver a prometer la desactivación inmediata.
+
+**Aplicación en VK/CDJ: sigue pendiente de Mario** (mismo comando de arriba). La versión de
+este commit es la que debe aplicarse; la anterior no.
