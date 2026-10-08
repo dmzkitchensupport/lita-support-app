@@ -267,3 +267,77 @@ directo en el reporte de esta sesión, nunca en texto plano en ningún repo.
 **Con el selector multi-cliente (ver entrada 2026-10-01), una cuenta que exista en más
 de uno de los 3 backends ahora vería hasta 3 opciones** — sin cambio de lógica, el ciclo
 ya prueba todos los elementos de `CLIENTES` sin detenerse en el primero.
+
+## 2026-10-08 — Eliminación de cuenta en autoservicio + decisión de Permisos (RAMA, sin deploy)
+
+**Estado: rama `feat/eliminar-cuenta-autoservicio`, NO fusionada a `main`** (GitHub Pages
+despliega `main`; Mario cerró la laptop y Cla congeló deploys). Proceso detenido aquí.
+
+**Veredicto MAR (gate de feature nueva): CONDICIONADO.** Condiciones y cómo se cumplen:
+1. Seudonimizar, no anonimizar a ciegas → `actor_colaborador_id` intacto; nombre/correo pasan
+   a "Colaborador #N · rol" en todo registro operativo (texto y jsonb).
+2. No ejecutar al enviar → la solicitud solo desactiva el acceso y programa la ejecución a
+   +10 días naturales (≤15 hábiles, art. 31 LFPDPPP); Mario puede retener
+   (`estado='retenida'`). Aviso solo a Mario, nunca al usuario ni al cliente.
+3. Buzón primero → privacidad@litasupport.com ya existe (Cla, 8 oct).
+4. Probado con cuentas QA `*@lita-support.internal`.
+5. Bloqueo del último admin/propietario del cliente (`motivo:'ultimo_admin'`).
+
+**Qué se construyó**
+- `supabase/migrations/20261008120000_rpc_eliminar_cuenta.sql` (backend de tenant, idéntica
+  para VK/CDJ/demo): tablas `eliminacion_cuenta_solicitudes` y `eliminacion_cuenta_auditoria`
+  (RLS sin políticas; auditoría de solo inserción por trigger), `rpc_eliminar_cuenta_solicitar`
+  (anon; verifica contraseña, límite 5 fallos/15 min), `rpc_eliminar_cuenta_ejecutar` y
+  `rpc_eliminar_cuenta_ejecutar_vencidas` (sin grant a anon; pg_cron diario 08:15 CDMX),
+  `rpc_eliminar_cuenta_verificar_folio` (anon, sin PII). Se borran: contraseña, PIN, firma de
+  cierre (storage, ligada por `registro_actividad`), historial de login, `errores_cliente`,
+  `seguridad_intentos`. Se conservan seudonimizados: todos los registros operativos/NOM-251.
+- `index.html`: pantalla `#screen-eliminar` dentro de la app (requisito de Google Play), abierta
+  desde el enlace "Eliminar mi cuenta" del login o con `?eliminar=1` (a donde envía
+  litasupport.com/eliminar-cuenta). Prueba todos los backends, no revela en cuál existe un
+  correo, muestra folio y fecha. `sw.js` cache v3. `.gitignore` para `supabase/.temp/`.
+- La carpeta `supabase/` sin trackear era solo `supabase/.temp/linked-project.json` (CLI
+  ligada al proyecto lita-demo); ahora se ignora `.temp/` y se versiona `migrations/`.
+
+**Verificado (evidencia real)**
+- Migración APLICADA en demo `vyrbajxcvqhvageyxblg` (funciones + cron `eliminar-cuenta-vencidas`).
+- QA SQL como rol `anon`: contraseña mala → `{ok:false}`; buena → folio, `activo=false`,
+  `rpc_login` → `{ok:false}`; repetición → mismo folio `ya_existia`; anon no puede ejecutar
+  (`42501`); propietario único → `ultimo_admin`; auditoría rechaza DELETE.
+- Ejecución: firma borrada de storage (1), login borrado (1), `temperaturas.registrado_por` y
+  `registro_actividad` (nombre, correo, jsonb) → "Colaborador #1 · colaborador"; colaborador
+  con id intacto, sin credenciales. Un error real (apellido NOT NULL) hizo rollback completo;
+  corregido.
+- Puppeteer 390×844 contra la pantalla nueva y el backend demo: pantalla con `?eliminar=1`,
+  error genérico con contraseña mala, folio `EC-20261008-D07889` con contraseña buena, enlace
+  del login abre la pantalla, 0 pageerrors, sin scroll horizontal.
+- Datos de QA limpiados en demo (1 colaborador, 0 solicitudes, 0 buckets; la auditoría QA
+  queda, sin PII, por ser de solo inserción).
+
+**Bloqueado — escritura a producción VK/CDJ denegada por permisos** (no se buscó rodeo).
+Comando exacto para aplicarla (Mario o sesión con permiso):
+```
+cd ~/dev/lita-support-app
+supabase db query --linked --workdir <dir ligado a lvugrhyknlftfgcngajc> -f supabase/migrations/20261008120000_rpc_eliminar_cuenta.sql
+supabase db query --linked --workdir <dir ligado a kjvmdfzacpygzozcvlby> -f supabase/migrations/20261008120000_rpc_eliminar_cuenta.sql
+```
+(equivalente: pegar el archivo en el SQL Editor de cada proyecto). Mientras no se aplique,
+la pantalla responde con el mensaje genérico para cuentas de VK/CDJ (PGRST202 manejado).
+
+**Decisión de Permisos (03perms.png) — Tech + Diseño (vision-master), 8 oct: cierra el
+bloqueador del 25 sep.** No se pide nada en el login (los permisos web son por origen; lo
+concedido en app.litasupport.com no sirve en el portal). Se piden en el portal, la primera
+vez que se toca "Tomar evidencia", con pre-pantalla basada en 03perms.png (sin "PASO 2 DE 2",
+botón "Continuar"/"Ahora no", solo si `navigator.permissions.query` da "prompt"). Micrófono
+aparte, al tocar dictado. Cámara negada: mensaje con ruta a Ajustes + "Ya lo activé".
+Ubicación negada: no bloquea, foto con "Ubicación no disponible". Implementación en
+`vitality-control`/`cdj-support` (no en este repo): especificación en el reporte a Cla.
+
+**Tiendas (corrección de la lista del 25 sep)**: Play Console y Apple Developer Organization
+figuran como pagados en la memoria de Mario (20-22 sep) — SIN VERIFICAR desde aquí (no hay
+acceso a esas consolas). Último artefacto Android real: Release `android-v3` (`.aab` 1.04 MB,
+run 36083772268). iOS: proyecto Xcode con PWABuilder sin generar.
+
+**Qué sigue**: (1) aplicar migración en VK/CDJ; (2) fusionar esta rama y la de
+`proyecto-lita-support` (`feat/eliminar-cuenta-y-veracidad`); (3) QA real en VK/CDJ con
+cuenta `*@lita-support.internal`; (4) pre-pantalla de permisos en los portales.

@@ -224,6 +224,20 @@
   }
   .selector-opt:hover{ border-color:var(--lita-ocre); background:var(--lita-ocre-suave); }
   .selector-opt .arrow{ color:var(--lita-ocre-texto); font-weight:800; }
+
+  /* ---------- Eliminar mi cuenta (8 oct 2026) ---------- */
+  /* Requisito de Google Play: la eliminación se inicia DENTRO de la app. Misma pantalla a
+   * la que envía litasupport.com/eliminar-cuenta (?eliminar=1&origen=web). */
+  #screen-eliminar{ background:#FFFFFF; }
+  .elim-body{ padding:0 var(--lita-margen) 24px var(--lita-margen); display:flex; flex-direction:column; flex-grow:1; }
+  .elim-body > h1{ margin:24px 0 0 0; font-size:28px; font-weight:var(--lita-peso-titulo); letter-spacing:var(--lita-tracking-titulo); color:var(--lita-tinta); }
+  .elim-body > p.sub{ margin:8px 0 0 0; font-size:14px; line-height:1.5; color:var(--lita-texto-2); }
+  .elim-lista{ margin:16px 0 0 0; padding:14px 16px 14px 32px; border-radius:var(--lita-r-md); background:var(--lita-superficie-2); font-size:13.5px; line-height:1.55; color:var(--lita-tinta); }
+  .elim-lista li{ margin:2px 0; }
+  .elim-check{ flex-direction:row; align-items:flex-start; gap:10px; font-weight:600; font-size:13px; line-height:1.45; color:var(--lita-texto-2); }
+  .elim-check input{ width:20px; height:20px; flex-shrink:0; margin-top:1px; accent-color:var(--lita-ocre); }
+  #elim-form{ padding-top:20px; }
+  .elim-folio{ font-size:22px; font-weight:800; letter-spacing:.02em; color:var(--lita-tinta); margin:6px 0 0 0; }
 </style>
 </head>
 <body>
@@ -286,7 +300,42 @@
       <nav class="legal" aria-label="Privacidad">
         <a href="https://litasupport.com/privacidad" target="_blank" rel="noopener">Aviso de privacidad</a>
         <span aria-hidden="true">·</span>
-        <a href="https://litasupport.com/eliminar-cuenta" target="_blank" rel="noopener">Eliminar mi cuenta</a>
+        <a href="?eliminar=1" id="link-eliminar">Eliminar mi cuenta</a>
+      </nav>
+    </div>
+  </div>
+
+  <div id="screen-eliminar" class="screen">
+    <header class="login-header">
+      <button id="elim-back" class="back-btn" type="button" aria-label="Regresar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15181A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+      </button>
+      <span class="eyebrow">ELIMINAR MI CUENTA</span>
+    </header>
+    <div class="elim-body">
+      <h1>Eliminar mi cuenta</h1>
+      <p class="sub">Confirma que eres tú con el correo y la contraseña con los que entras a LiTa Support.</p>
+      <ul class="elim-lista">
+        <li>Tu acceso se desactiva en cuanto envías la solicitud.</li>
+        <li>En 10 días se borran tu contraseña, tu PIN, tu firma de cierre y tu historial de inicio de sesión.</li>
+        <li>Los registros de operación (temperaturas, listas, turnos) se conservan sin tu nombre: son de tu empleador y algunos los exige la ley.</li>
+      </ul>
+      <form id="elim-form" autocomplete="on">
+        <div>
+          <label for="elim-email">Correo</label>
+          <input id="elim-email" type="email" autocomplete="username" placeholder="tu@correo.com" required>
+        </div>
+        <div>
+          <label for="elim-pass">Contraseña</label>
+          <input id="elim-pass" type="password" autocomplete="current-password" placeholder="Tu contraseña" required>
+        </div>
+        <label class="elim-check"><input id="elim-ok" type="checkbox" required> Entiendo que no se puede deshacer después de 10 días.</label>
+        <div id="elim-msg" class="msg"></div>
+        <div class="login-spacer"></div>
+        <button id="elim-btn" class="btn-primary" type="submit">Solicitar eliminación</button>
+      </form>
+      <nav class="legal" aria-label="Detalle">
+        <a href="https://litasupport.com/eliminar-cuenta" target="_blank" rel="noopener">Qué se elimina y qué se conserva</a>
       </nav>
     </div>
   </div>
@@ -473,6 +522,103 @@ if('serviceWorker' in navigator){
   document.getElementById('login-back').addEventListener('click', function(){
     lScreen.classList.remove('is-active');
     wScreen.classList.add('is-active');
+  });
+})();
+
+/* ---------- Eliminar mi cuenta (8 oct 2026) ----------
+ * Llama rpc_eliminar_cuenta_solicitar en cada backend (misma resolución que el login:
+ * se prueban todos, nunca se revela en cuál existe el correo si la contraseña falla).
+ * El backend verifica la contraseña, desactiva el acceso y programa la seudonimización a
+ * +10 días (migración supabase/migrations/20261008120000_rpc_eliminar_cuenta.sql).
+ * Después se avisa SOLO a Mario vía litasupport.com/api/eliminar-cuenta/aviso (mejor
+ * esfuerzo). Nunca se manda correo al usuario ni al cliente desde aquí. */
+var TENANT_AVISO = {'vitality-control':'vk', 'cdjsupport':'cdj', 'lita-demo':'demo'};
+
+function solicitarEliminacion(c, email, pass, canal){
+  return new Promise(function(resolve){
+    var sb = _getClient(c);
+    if(!sb){ resolve({ok:false, motivo:'sin_conexion'}); return; }
+    var tm = {_timeout:true};
+    var tp = new Promise(function(res){ setTimeout(function(){ res(tm); }, 10000); });
+    Promise.race([sb.rpc('rpc_eliminar_cuenta_solicitar', {p_email: email, p_pass: pass, p_canal: canal}), tp])
+      .then(function(r){
+        if(r === tm){ resolve({ok:false, motivo:'sin_conexion'}); return; }
+        if(r.error){ resolve({ok:false, motivo: (r.error.code === 'PGRST202' ? 'no_disponible' : 'sin_conexion')}); return; }
+        if(!r.data || !r.data.ok){ resolve({ok:false, motivo:(r.data && r.data.motivo) || 'credencial'}); return; }
+        resolve({ok:true, cliente:c, folio:r.data.folio, programada:r.data.programada_para});
+      })
+      .catch(function(){ resolve({ok:false, motivo:'sin_conexion'}); });
+  });
+}
+
+(function(){
+  var eScreen = document.getElementById('screen-eliminar');
+  var params = new URLSearchParams(window.location.search);
+  var canal = params.get('origen') === 'web' ? 'web' : 'app';
+  function mostrar(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('is-active'); });
+    document.getElementById(id).classList.add('is-active');
+  }
+  document.getElementById('link-eliminar').addEventListener('click', function(ev){
+    ev.preventDefault(); mostrar('screen-eliminar');
+    var e = document.getElementById('sso-email').value.trim();
+    if(e) document.getElementById('elim-email').value = e;
+  });
+  document.getElementById('elim-back').addEventListener('click', function(){ mostrar('screen-login'); });
+  if(params.has('eliminar')) mostrar('screen-eliminar');
+
+  document.getElementById('elim-form').addEventListener('submit', async function(ev){
+    ev.preventDefault();
+    var email = document.getElementById('elim-email').value.trim().toLowerCase();
+    var pass  = document.getElementById('elim-pass').value;
+    var msg   = document.getElementById('elim-msg');
+    var btn   = document.getElementById('elim-btn');
+    msg.className = 'msg'; msg.textContent = '';
+    if(!email || !pass || !document.getElementById('elim-ok').checked) return;
+    btn.disabled = true; var txt = btn.textContent; btn.textContent = 'Verificando…';
+    try{
+      if(!window.supabase){ await new Promise(function(res){ setTimeout(res, 300); }); }
+      var exitos = [], motivos = [];
+      for(var i=0;i<CLIENTES.length;i++){
+        var r = await solicitarEliminacion(CLIENTES[i], email, pass, canal);
+        if(r.ok) exitos.push(r); else motivos.push(r.motivo);
+      }
+      if(exitos.length){
+        exitos.forEach(function(x){
+          try{
+            fetch('https://litasupport.com/api/eliminar-cuenta/aviso', {
+              method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({tenant: TENANT_AVISO[x.cliente.nombre], folio: x.folio})
+            }).catch(function(){});
+          }catch(_){}
+        });
+        var fecha = new Date(exitos[0].programada).toLocaleDateString('es-MX', {day:'numeric', month:'long', year:'numeric', timeZone:'America/Mexico_City'});
+        var form = document.getElementById('elim-form');
+        form.innerHTML = '';
+        var ok = document.createElement('div');
+        ok.className = 'msg info show';
+        ok.innerHTML = '<strong>Solicitud registrada.</strong> Tu acceso ya quedó desactivado. La eliminación se ejecuta automáticamente el ' + fecha + '. Guarda tu folio:';
+        form.appendChild(ok);
+        exitos.forEach(function(x){
+          var f = document.createElement('p'); f.className = 'elim-folio';
+          f.textContent = x.folio + (exitos.length > 1 ? ' · ' + x.cliente.etiqueta : '');
+          form.appendChild(f);
+        });
+        return;
+      }
+      msg.className = 'msg error show';
+      if(motivos.indexOf('ultimo_admin') !== -1){
+        msg.textContent = 'Eres la única persona administradora de tu negocio. Antes de eliminar tu cuenta, otra persona debe tener ese rol. Escríbenos por el canal de litasupport.com/eliminar-cuenta.';
+      } else if(motivos.indexOf('bloqueado') !== -1){
+        msg.textContent = 'Demasiados intentos. Espera 15 minutos e intenta de nuevo.';
+      } else if(motivos.length && motivos.every(function(m){ return m === 'sin_conexion'; })){
+        msg.textContent = 'No se pudo verificar ahora mismo (revisa tu conexión) — intenta de nuevo.';
+      } else {
+        msg.textContent = 'No pudimos verificar tu cuenta con ese correo y contraseña. Si olvidaste tu contraseña, pídela a quien administra LiTa Support en tu negocio o usa el canal por escrito de litasupport.com/eliminar-cuenta.';
+      }
+    } finally {
+      btn.disabled = false; btn.textContent = txt;
+    }
   });
 })();
 </script>

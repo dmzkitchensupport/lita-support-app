@@ -4,7 +4,7 @@
 // worker con evento fetch), sin cachear agresivamente -- esta página resuelve login
 // contra dos backends reales, una versión vieja cacheada nunca debe servirse como si
 // fuera la actual. Estrategia: network-first con fallback a cache solo si no hay red.
-const CACHE = 'lita-login-shell-v2'; // v2 (2 oct 2026): fuerza purgar el cache viejo potencialmente stale
+const CACHE = 'lita-login-shell-v3'; // v3 (8 oct 2026): pantalla Eliminar mi cuenta. v2 (2 oct 2026): fuerza purgar el cache viejo potencialmente stale
 const SHELL = ['./index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', (event) => {
