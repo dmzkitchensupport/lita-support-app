@@ -380,3 +380,21 @@ sesión con esta cuenta; si la tienes abierta en otro teléfono, cierra sesión 
 
 **Aplicación en VK/CDJ: sigue pendiente de Mario** (mismo comando de arriba). La versión de
 este commit es la que debe aplicarse; la anterior no.
+
+### 2026-10-08 (cierre) — Publicado en `main` (app.litasupport.com)
+
+Mario aplicó la migración `93ecdb3` en VK y CDJ. Verificación de solo lectura antes de
+publicar: 4 funciones `rpc_eliminar_cuenta*` con la regla de ruta exacta (sin regla de
+tiempo), cron `eliminar-cuenta-vencidas`, 0 solicitudes en ambos.
+
+**QA antes del push (Puppeteer 390×844, rama servida en local contra los 3 backends reales)**:
+- VK (`stress1@lita-support.internal`, contraseña incorrecta) y CDJ (`qa-local@…`,
+  contraseña incorrecta): mensaje genérico de credencial, 0 solicitudes creadas, cuentas
+  siguen activas; quedaron registros `verificacion_fallida` en la auditoría (esperado).
+- Demo: contraseña mala → mensaje genérico; buena → folio `EC-20261008-FC9898`, solicitud
+  `pendiente` canal `web`, `rpc_login` después → `{ok:false}`. Limpiado (1 colaborador,
+  0 solicitudes).
+- 0 pageerrors y sin scroll horizontal en las 4 corridas.
+
+**Sigue pendiente**: la revalidación de `activo` en sesiones abiertas y el registro de
+`path` de la firma, ambos en los portales VK/CDJ (especificaciones arriba).
