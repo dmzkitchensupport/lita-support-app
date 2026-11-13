@@ -459,9 +459,12 @@ dominios propios de la app iOS → el revisor habría salido a Safari. Agregado 
 - Proyecto Supabase `lita-demo` estaba PAUSADO (plan gratuito) → reactivado 13 nov.
 
 **Bloqueadores / riesgos abiertos**:
-- 🔴 Tech: `lita-demo` tiene una sobrecarga vieja de `rpc_upsert_colaborador(p_admin_key, …)`
-  con la llave de admin escrita en el cuerpo de la función; permite crear/actualizar usuarios
-  admin del demo a quien la conozca. Solo demo. Pendiente decisión de Mario para borrarla.
+- ~~🔴 Tech: sobrecarga vieja `rpc_upsert_colaborador(p_admin_key, …)` con llave de admin
+  escrita en la función (lita-demo)~~ → CERRADO 13 nov: Mario ejecutó
+  `drop function public.rpc_upsert_colaborador(text×7, boolean)` en el SQL Editor. Evidencia:
+  `pg_proc` solo conserva `rpc_upsert_colaborador(text,text,text,text,text,text,text,text,boolean,text)`
+  (la que usa portal.html, valida admin por correo+contraseña). Revisar si VK/CDJ tienen la
+  misma sobrecarga vieja: SIN VERIFICAR.
 - ~~`lita-demo` se pausa tras ~7 días sin uso~~ → CERRADO: workflow `salud-lita.yml` (diario
   07:17 CDMX) hace una consulta de solo lectura al demo con la anon key pública y además
   verifica 200 en app.litasupport.com, assetlinks.json, /privacidad y el portal demo
