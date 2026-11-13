@@ -463,8 +463,8 @@ dominios propios de la app iOS → el revisor habría salido a Safari. Agregado 
   escrita en la función (lita-demo)~~ → CERRADO 13 nov: Mario ejecutó
   `drop function public.rpc_upsert_colaborador(text×7, boolean)` en el SQL Editor. Evidencia:
   `pg_proc` solo conserva `rpc_upsert_colaborador(text,text,text,text,text,text,text,text,boolean,text)`
-  (la que usa portal.html, valida admin por correo+contraseña). Revisar si VK/CDJ tienen la
-  misma sobrecarga vieja: SIN VERIFICAR.
+  (la que usa portal.html, valida admin por correo+contraseña). VK (lvugrhyknlftfgcngajc) y CDJ
+  (kjvmdfzacpygzozcvlby) revisados el 13 nov en SQL Editor: solo la firma buena, `usa_llave = false`.
 - ~~`lita-demo` se pausa tras ~7 días sin uso~~ → CERRADO: workflow `salud-lita.yml` (diario
   07:17 CDMX) hace una consulta de solo lectura al demo con la anon key pública y además
   verifica 200 en app.litasupport.com, assetlinks.json, /privacidad y el portal demo
