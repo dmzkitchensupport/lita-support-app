@@ -469,4 +469,4 @@ dominios propios de la app iOS → el revisor habría salido a Safari. Agregado 
   07:17 CDMX) hace una consulta de solo lectura al demo con la anon key pública y además
   verifica 200 en app.litasupport.com, assetlinks.json, /privacidad y el portal demo
   (regla 10). Falla en rojo = correo de GitHub a Mario.
-- Solicitud de distribución no listada: formulario llenado, falta número de usuarios y envío.
+- Solicitud de distribución no listada ENVIADA 13 nov (Apple: "Thank you for your submission"); 2 organizaciones, 50 usuarios (25 VK + 25 CDJ), dispositivos no administrados, MEX/USA/VEN. Irreversible una vez aprobada. Respuesta de Apple a mario_zumaran@hotmail.com.
