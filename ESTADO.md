@@ -444,3 +444,24 @@ por Apple (`processingState: VALID`, verificado por API), 0 certificados vivos a
 **Corrección**: el portal demo (`dmzkitchensupport.github.io/lita-demo`) no estaba en los
 dominios propios de la app iOS → el revisor habría salido a Safari. Agregado a
 `dominiosPropios` y `WKAppBoundDomains`; nueva compilación en curso.
+
+### 2026-11-13 (tarde, cierre) — iOS 1.0 enviada a revisión
+
+- Ficha es-MX por API (descripción, subtítulo, keywords, soporte/privacidad litasupport.com),
+  categoría Business/Productivity, edad sin contenido sensible, gratis, disponible en MEX/USA/
+  ABW/VEN, publicación MANUAL, 2 capturas 1320×2868 (bienvenida y acceso), derechos de
+  contenido: sin contenido de terceros. Privacidad publicada por Mario: nombre, correo,
+  ubicación exacta, fotos, ID de usuario — funcionalidad, vinculados, sin rastreo.
+- Revisión: contacto Mario; cuenta demo `demo@litasupport.com` (contraseña puesta por Mario
+  en Supabase y en App Store Connect; SIN VERIFICAR desde esta sesión — no se probó el login).
+- Compilación 4 asignada. Envío por API: reviewSubmission 73d5f915-… → estado
+  `WAITING_FOR_REVIEW` (verificado por API).
+- Proyecto Supabase `lita-demo` estaba PAUSADO (plan gratuito) → reactivado 13 nov.
+
+**Bloqueadores / riesgos abiertos**:
+- 🔴 Tech: `lita-demo` tiene una sobrecarga vieja de `rpc_upsert_colaborador(p_admin_key, …)`
+  con la llave de admin escrita en el cuerpo de la función; permite crear/actualizar usuarios
+  admin del demo a quien la conozca. Solo demo. Pendiente decisión de Mario para borrarla.
+- `lita-demo` en plan gratuito se pausa tras ~7 días sin uso: si se pausa durante la revisión
+  de Apple, rechazo. Falta keep-alive diario o plan Pro.
+- Solicitud de distribución no listada: formulario llenado, falta número de usuarios y envío.
