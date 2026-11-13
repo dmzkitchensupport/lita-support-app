@@ -398,3 +398,36 @@ tiempo), cron `eliminar-cuenta-vencidas`, 0 solicitudes en ambos.
 
 **Sigue pendiente**: la revalidación de `activo` en sesiones abiertas y el registro de
 `path` de la firma, ambos en los portales VK/CDJ (especificaciones arriba).
+
+## 2026-11-13 — App iOS (contenedor nativo) + estado de tiendas
+
+**Qué cambió**: nueva carpeta `ios/` con app nativa SwiftUI + WKWebView (`ios/LiTa/LiTaApp.swift`)
+que abre `https://app.litasupport.com/index.html`. Navegación limitada a dominios propios
+(`WKAppBoundDomains`: app.litasupport.com, litasupport.com, vitality-control.github.io,
+cdjsupport.github.io); el resto (mailto, tel, externos) se abre fuera de la app. Pantalla nativa
+"Sin conexión" con Reintentar, recarga por arrastre, cámara/micrófono concedidos solo a dominios
+propios, textos de permisos en español (cámara, micrófono, fotos, ubicación). Ícono 1024 px
+redibujado con el mismo diseño de `icons/icon-512.png`. Proyecto generado con XcodeGen
+(`ios/project.yml`). Workflow `.github/workflows/build-ios.yml` (macos-15, manual): genera,
+archiva, exporta `.ipa` y lo sube a App Store Connect con `altool` + llave de API.
+No se tocó `index.html` ni nada servido por la web. SIN VERIFICAR: compilación Swift (no hay
+Xcode en la sesión); la primera corrida del workflow es la prueba real.
+
+**Apple (verificado por API el 13 nov)**: cuenta Apple Developer Program individual, Team
+77R5K7935X, vigente al 23 sep 2027. Creados por API: bundle ID `support.lita.app`
+(39U27SHVNH), certificado Apple Distribution 732DAW4FCG (vence 13 nov 2027), perfil
+"LiTa Support App Store" (a1795ddf-…). App en App Store Connect: "LiTa Support",
+id 6834486679, SKU lita-support-ios, idioma es-MX. Llave API "LiTa CI GitHub" (Gestor de apps).
+
+**Google Play (13 nov)**: cuenta personal "DMZ Kitchen Support" (8471218886866962115) pagada;
+estado de comerciante declarado; dispositivo Android verificado; identidad EN REVISIÓN por
+Google; teléfono se habilita tras la identidad. `.aab` vigente: release `android-v3`
+(versionCode 2, targetSdk 36, firmado con lita-app-upload-key-2026, huella = assetlinks).
+
+**Bloqueadores abiertos**:
+- Secretos de GitHub para el workflow iOS (ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8_BASE64,
+  IOS_DIST_P12_BASE64, IOS_DIST_P12_PASSWORD, IOS_PROFILE_BASE64): pendientes de cargar.
+- Riesgo de revisión Apple 4.2 (app que envuelve web): se pedirá distribución no listada.
+- Play: esperar aprobación de identidad; luego prueba cerrada 14 días con 12 testers.
+
+**Qué sigue**: cargar secretos → correr "Build iOS (App Store)" → TestFlight → ficha + revisión.

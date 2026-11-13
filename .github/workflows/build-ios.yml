@@ -1,0 +1,92 @@
+# Compila, firma y sube LiTa Support (iOS) a App Store Connect / TestFlight.
+# Contenedor nativo SwiftUI + WKWebView (ios/), proyecto generado con XcodeGen.
+# Firma manual con certificado "Apple Distribution" y perfil "LiTa Support App Store"
+# (ambos creados por API el 13 nov 2026). Secretos requeridos en el repo:
+#   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8_BASE64,
+#   IOS_DIST_P12_BASE64, IOS_DIST_P12_PASSWORD, IOS_PROFILE_BASE64
+# El número de compilación es github.run_number (siempre crece).
+name: Build iOS (App Store)
+
+on:
+  workflow_dispatch:
+    inputs:
+      subir:
+        description: "Subir a App Store Connect (TestFlight)"
+        type: boolean
+        default: true
+
+jobs:
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Xcode más reciente
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          xcodebuild -version
+
+      - name: Instalar XcodeGen
+        run: brew install xcodegen
+
+      - name: Importar certificado y perfil
+        env:
+          P12_B64: ${{ secrets.IOS_DIST_P12_BASE64 }}
+          P12_PASS: ${{ secrets.IOS_DIST_P12_PASSWORD }}
+          PROFILE_B64: ${{ secrets.IOS_PROFILE_BASE64 }}
+        run: |
+          KC="$RUNNER_TEMP/lita.keychain-db"
+          KC_PASS="$(uuidgen)"
+          echo "$P12_B64" | base64 --decode > "$RUNNER_TEMP/dist.p12"
+          security create-keychain -p "$KC_PASS" "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p "$KC_PASS" "$KC"
+          security import "$RUNNER_TEMP/dist.p12" -P "$P12_PASS" -A -t cert -f pkcs12 -k "$KC"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KC_PASS" "$KC" >/dev/null
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
+          security find-identity -v -p codesigning "$KC"
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          echo "$PROFILE_B64" | base64 --decode > "$RUNNER_TEMP/lita.mobileprovision"
+          UUID=$(security cms -D -i "$RUNNER_TEMP/lita.mobileprovision" | plutil -extract UUID raw -)
+          cp "$RUNNER_TEMP/lita.mobileprovision" "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"
+          echo "Perfil instalado: $UUID"
+
+      - name: Generar proyecto
+        working-directory: ios
+        run: xcodegen generate
+
+      - name: Archivar
+        working-directory: ios
+        run: |
+          xcodebuild -project LiTa.xcodeproj -scheme LiTa -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/LiTa.xcarchive" \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            -quiet archive
+
+      - name: Exportar .ipa
+        run: |
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/LiTa.xcarchive" \
+            -exportOptionsPlist ios/ExportOptions.plist -exportPath "$RUNNER_TEMP/export"
+          ls -la "$RUNNER_TEMP/export"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lita-support-ios-${{ github.run_number }}
+          path: ${{ runner.temp }}/export/*.ipa
+
+      - name: Subir a App Store Connect
+        if: ${{ inputs.subir }}
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: |
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          echo "$ASC_KEY_P8_BASE64" | base64 --decode > "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          IPA=$(ls "$RUNNER_TEMP"/export/*.ipa | head -1)
+          xcrun altool --upload-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+
+      - name: Limpiar llavero
+        if: always()
+        run: security delete-keychain "$RUNNER_TEMP/lita.keychain-db" || true
