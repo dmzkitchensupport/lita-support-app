@@ -67,9 +67,14 @@ def crear():
     s, d = api("POST", "/v1/certificates", {"data": {"type": "certificates", "attributes": {
         "certificateType": "DISTRIBUTION", "csrContent": csr}}})
     cert = ok(s, d, "certificado")["data"]
+    # Guardar el ID ya, para que 'revocar' lo limpie aunque algo falle después.
+    json.dump({"cert": cert["id"]}, open(ESTADO, "w"))
     open(os.path.join(TMP, "dist.cer"), "wb").write(base64.b64decode(cert["attributes"]["certificateContent"]))
     run("openssl", "x509", "-inform", "der", "-in", "dist.cer", "-out", "dist.pem")
-    run("openssl", "pkcs12", "-export", "-legacy", "-inkey", "dist.key", "-in", "dist.pem",
+    # macOS trae LibreSSL (sin -legacy); OpenSSL 3 necesita -legacy para que el llavero lo lea.
+    legacy = ["-legacy"] if b"OpenSSL 3" in subprocess.run(
+        ["openssl", "version"], capture_output=True).stdout else []
+    run("openssl", "pkcs12", "-export", *legacy, "-inkey", "dist.key", "-in", "dist.pem",
         "-out", "dist.p12", "-passout", "pass:" + p12_pass, "-name", "Apple Distribution")
     os.remove(os.path.join(TMP, "dist.key"))
 
@@ -97,8 +102,9 @@ def revocar():
         print("Nada que revocar.")
         return
     e = json.load(open(ESTADO))
-    s, _ = api("DELETE", f"/v1/profiles/{e['perfil']}")
-    print("perfil borrado:", s)
+    if e.get("perfil"):
+        s, _ = api("DELETE", f"/v1/profiles/{e['perfil']}")
+        print("perfil borrado:", s)
     s, _ = api("DELETE", f"/v1/certificates/{e['cert']}")
     print("certificado revocado:", s)
 

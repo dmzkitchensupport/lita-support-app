@@ -429,9 +429,9 @@ Google; teléfono se habilita tras la identidad. `.aab` vigente: release `androi
   .p8). Pendientes de que Mario los cargue en Settings > Secrets (el proxy de la sesión bloquea
   la API de secretos). Firma rediseñada: `ios/ci/firma.py` crea certificado y perfil efímeros
   por corrida y los revoca al final; ya no se guarda .p12 ni perfil en secretos.
-- Quedó vivo el certificado de prueba 732DAW4FCG y el perfil "LiTa Support App Store"
-  (creados a mano; su llave privada se borró). Revocarlos desde developer.apple.com >
-  Certificates cuando Mario quiera (la sesión no pudo borrarlos).
+- Certificados huérfanos 732DAW4FCG (manual) y 6DVXSJ4L3Q (corrida 1, falló en pkcs12
+  -legacy de LibreSSL) y perfil 2H96N5257A: revocados por ID exacto el 13 nov (HTTP 204).
+  `firma.py` ahora guarda el ID del certificado en cuanto se crea para revocarlo siempre.
 - Riesgo de revisión Apple 4.2 (app que envuelve web): se pedirá distribución no listada.
 - Play: esperar aprobación de identidad; luego prueba cerrada 14 días con 12 testers.
 
