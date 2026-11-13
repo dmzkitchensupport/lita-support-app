@@ -462,6 +462,8 @@ dominios propios de la app iOS → el revisor habría salido a Safari. Agregado 
 - 🔴 Tech: `lita-demo` tiene una sobrecarga vieja de `rpc_upsert_colaborador(p_admin_key, …)`
   con la llave de admin escrita en el cuerpo de la función; permite crear/actualizar usuarios
   admin del demo a quien la conozca. Solo demo. Pendiente decisión de Mario para borrarla.
-- `lita-demo` en plan gratuito se pausa tras ~7 días sin uso: si se pausa durante la revisión
-  de Apple, rechazo. Falta keep-alive diario o plan Pro.
+- ~~`lita-demo` se pausa tras ~7 días sin uso~~ → CERRADO: workflow `salud-lita.yml` (diario
+  07:17 CDMX) hace una consulta de solo lectura al demo con la anon key pública y además
+  verifica 200 en app.litasupport.com, assetlinks.json, /privacidad y el portal demo
+  (regla 10). Falla en rojo = correo de GitHub a Mario.
 - Solicitud de distribución no listada: formulario llenado, falta número de usuarios y envío.

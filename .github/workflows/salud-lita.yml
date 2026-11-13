@@ -1,0 +1,54 @@
+# Salud diaria de LiTa Support (gobernanza DMZA regla 10).
+# 1) Confirma que app.litasupport.com, assetlinks.json y el portal demo responden 200.
+# 2) Mantiene despierto el proyecto Supabase del demo (lita-demo, plan gratuito: se pausa
+#    tras ~7 días sin uso; si se pausa durante la revisión de Apple/Google, rechazo).
+#    Hace una consulta de solo lectura con la anon key pública que ya vive en index.html.
+# Si algo falla, la corrida queda en rojo y GitHub avisa por correo al dueño del repo.
+name: Salud LiTa (diaria)
+
+on:
+  schedule:
+    - cron: "17 13 * * *" # 07:17 hora de Ciudad de México
+  workflow_dispatch:
+
+jobs:
+  salud:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sitio, asset links y portal demo
+        run: |
+          set -e
+          for u in https://app.litasupport.com/index.html \
+                   https://app.litasupport.com/.well-known/assetlinks.json \
+                   https://litasupport.com/privacidad \
+                   https://dmzkitchensupport.github.io/lita-demo/portal.html; do
+            c=$(curl -s -o /dev/null -w '%{http_code}' -L "$u")
+            echo "$c $u"
+            [ "$c" = "200" ] || { echo "::error::$u respondió $c"; exit 1; }
+          done
+
+      - name: Mantener despierto Supabase demo (solo lectura)
+        run: |
+          python3 - <<'EOF'
+          import re, sys, json, urllib.request, urllib.error
+          html = open('index.html', encoding='utf-8').read()
+          bloque = html[html.index("nombre: 'lita-demo'"):]
+          url = re.search(r"url:\s*'([^']+)'", bloque).group(1)
+          key = re.search(r"key:\s*'([^']+)'", bloque).group(1)
+          req = urllib.request.Request(url + "/rest/v1/colaboradores?select=id&limit=1",
+                                       headers={"apikey": key, "Authorization": "Bearer " + key})
+          try:
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  print("demo responde", r.status)
+          except urllib.error.HTTPError as e:
+              # 401/403/404 por RLS o permisos igual prueba que la base está despierta.
+              if e.code in (401, 403, 404):
+                  print("demo responde", e.code, "(base despierta)")
+              else:
+                  print(f"::error::demo respondió {e.code}: {e.read()[:300]!r}"); sys.exit(1)
+          except Exception as e:
+              print(f"::error::demo sin respuesta (¿pausado?): {e}"); sys.exit(1)
+          EOF
