@@ -10,6 +10,7 @@ let inicioURL = URL(string: "https://app.litasupport.com/index.html")!
 let dominiosPropios: Set<String> = [
     "app.litasupport.com", "litasupport.com",
     "vitality-control.github.io", "cdjsupport.github.io",
+    "dmzkitchensupport.github.io", // portal del tenant demo (Fonda Raíz), usado por el revisor de Apple
 ]
 
 @main

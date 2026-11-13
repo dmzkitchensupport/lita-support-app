@@ -436,3 +436,11 @@ Google; teléfono se habilita tras la identidad. `.aab` vigente: release `androi
 - Play: esperar aprobación de identidad; luego prueba cerrada 14 días con 12 testers.
 
 **Qué sigue**: cargar secretos → correr "Build iOS (App Store)" → TestFlight → ficha + revisión.
+
+### 2026-11-13 (tarde) — iOS compilación 3 en App Store Connect
+
+Corrida `Build iOS (App Store)` 43470999004 en success: compilación **3** subida y procesada
+por Apple (`processingState: VALID`, verificado por API), 0 certificados vivos al final.
+**Corrección**: el portal demo (`dmzkitchensupport.github.io/lita-demo`) no estaba en los
+dominios propios de la app iOS → el revisor habría salido a Safari. Agregado a
+`dominiosPropios` y `WKAppBoundDomains`; nueva compilación en curso.
