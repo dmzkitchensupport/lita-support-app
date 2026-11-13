@@ -425,8 +425,13 @@ Google; teléfono se habilita tras la identidad. `.aab` vigente: release `androi
 (versionCode 2, targetSdk 36, firmado con lita-app-upload-key-2026, huella = assetlinks).
 
 **Bloqueadores abiertos**:
-- Secretos de GitHub para el workflow iOS (ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8_BASE64,
-  IOS_DIST_P12_BASE64, IOS_DIST_P12_PASSWORD, IOS_PROFILE_BASE64): pendientes de cargar.
+- Secretos de GitHub para el workflow iOS: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (contenido del
+  .p8). Pendientes de que Mario los cargue en Settings > Secrets (el proxy de la sesión bloquea
+  la API de secretos). Firma rediseñada: `ios/ci/firma.py` crea certificado y perfil efímeros
+  por corrida y los revoca al final; ya no se guarda .p12 ni perfil en secretos.
+- Quedó vivo el certificado de prueba 732DAW4FCG y el perfil "LiTa Support App Store"
+  (creados a mano; su llave privada se borró). Revocarlos desde developer.apple.com >
+  Certificates cuando Mario quiera (la sesión no pudo borrarlos).
 - Riesgo de revisión Apple 4.2 (app que envuelve web): se pedirá distribución no listada.
 - Play: esperar aprobación de identidad; luego prueba cerrada 14 días con 12 testers.
 
