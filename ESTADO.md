@@ -475,3 +475,4 @@ dominios propios de la app iOS → el revisor habría salido a Safari. Agregado 
 - Play Console: teléfonos verificados (Mario dio el código), app "LiTa Support" creada (id 4974144834836856800, paquete support.lita.app, gratis).
 - Declaraciones cargadas: privacidad (litasupport.com/privacidad), sin anuncios, sin ID de publicidad, no gubernamental, sin funciones financieras ni de salud.
 - Recursos de ficha en `tienda/` (ícono 512, gráfico 1024×500, 2 capturas 1080×1920) servidos por Pages para subirlos a Play.
+- Ícono cambiado a la marca LiTa (3 cuadros crema #EDEAE4 + 1 círculo ocre #C68A3D sobre carbón #2A2E30), a pedido de Mario (15 nov): `icons/icon-512.png`, `icons/icon-192.png` (PWA y fuente del ícono Android vía twa-manifest), `ios/.../icon-1024.png`, `tienda/icono_512.png` y `tienda/grafico_1024x500.png`. El .aab android-v3 y la compilación iOS 4 (en revisión) todavía traen el ícono "LS" anterior.
