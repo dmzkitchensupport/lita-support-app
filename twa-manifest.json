@@ -18,13 +18,13 @@
     "path": "./android.keystore",
     "alias": "lita-app-upload-key-2026"
   },
-  "appVersionCode": 1,
-  "appVersion": "1",
+  "appVersionCode": 3,
+  "appVersion": "3",
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://app.litasupport.com/manifest.json",
   "fallbackType": "customtabs",
   "orientation": "portrait",
-  "minSdkVersion": 21,
+  "minSdkVersion": 24,
   "fingerprints": [
     {
       "name": "lita-app-upload-key-2026 (LiTa Support, generado 24 sep 2026 -- primera app unificada)",
@@ -36,6 +36,8 @@
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "alphaDependencies": { "enabled": false },
+  "alphaDependencies": {
+    "enabled": false
+  },
   "features": {}
 }
