@@ -481,6 +481,6 @@ dominios propios de la app iOS → el revisor habría salido a Safari. Agregado 
 ### 2026-11-15 (noche) — Google Play: declaraciones y prueba cerrada
 - android-v6 compiló bien (versionCode 3, ícono de marca, minSdk 24).
 - Play Console: clasificación de contenido aplicada (IARC, todas las edades); detalles de acceso guardados (cuenta demo `demo@litasupport.com` de Fonda Raíz, contraseña la escribió Mario; instrucciones recortadas a 446/500); público objetivo 18+; seguridad de los datos guardada.
-- Prueba cerrada "Alpha": país México. `tienda/lita-android-v6.aab` publicado en Pages solo para subirlo a Play desde el navegador (es el mismo .aab del release android-v6; no contiene secretos). Borrar de `tienda/` cuando Play lo acepte.
+- Prueba cerrada "Alpha": país México. `tienda/lita-android-v6.aab` (mismo .aab del release android-v6, sin secretos) vive solo en la rama `feat/ios-app` y se tomó de raw.githubusercontent para subirlo desde el navegador; el push a `main` lo bloqueó el clasificador. Play lo aceptó: versión "4 (4)" en borrador de Alpha, con notas en es-419. Nota: Play reporta versionCode 4 aunque `twa-manifest.json` dice 3 (el build lo incrementa); el siguiente .aab debe salir con 5 o más. Borrar el .aab de `tienda/` antes de fusionar la rama.
 - Bloqueadores abiertos: declaración de comerciante y Condiciones del Servicio a nivel app (clic legal de Mario); 12 correos Gmail de testers (los da Mario); prueba cerrada de 14 días con 12 testers antes de pedir producción (regla de Google para cuentas personales).
-- Qué sigue: subir el .aab a la versión de Alpha, agregar testers, enviar a revisión (clic de Mario).
+- Qué sigue: agregar testers a Alpha, enviar la versión a revisión (clic de Mario).
