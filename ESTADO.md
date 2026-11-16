@@ -477,3 +477,10 @@ dominios propios de la app iOS → el revisor habría salido a Safari. Agregado 
 - Recursos de ficha en `tienda/` (ícono 512, gráfico 1024×500, 2 capturas 1080×1920) servidos por Pages para subirlos a Play.
 - Ícono cambiado a la marca LiTa (3 cuadros crema #EDEAE4 + 1 círculo ocre #C68A3D sobre carbón #2A2E30), a pedido de Mario (15 nov): `icons/icon-512.png`, `icons/icon-192.png` (PWA y fuente del ícono Android vía twa-manifest), `ios/.../icon-1024.png`, `tienda/icono_512.png` y `tienda/grafico_1024x500.png`. El .aab android-v3 y la compilación iOS 4 (en revisión) todavía traen el ícono "LS" anterior.
 - Android: build #4 falló (androidbrowserhelper 2.7.4 exige minSdk 24). `twa-manifest.json`: minSdkVersion 21→24, appVersionCode 3 / appVersion "3" (nuevo .aab con el ícono de la marca). iOS: build 5 con ícono nuevo subido a App Store Connect (la 1.0 en revisión sigue con la build 4).
+
+### 2026-11-15 (noche) — Google Play: declaraciones y prueba cerrada
+- android-v6 compiló bien (versionCode 3, ícono de marca, minSdk 24).
+- Play Console: clasificación de contenido aplicada (IARC, todas las edades); detalles de acceso guardados (cuenta demo `demo@litasupport.com` de Fonda Raíz, contraseña la escribió Mario; instrucciones recortadas a 446/500); público objetivo 18+; seguridad de los datos guardada.
+- Prueba cerrada "Alpha": país México. `tienda/lita-android-v6.aab` publicado en Pages solo para subirlo a Play desde el navegador (es el mismo .aab del release android-v6; no contiene secretos). Borrar de `tienda/` cuando Play lo acepte.
+- Bloqueadores abiertos: declaración de comerciante y Condiciones del Servicio a nivel app (clic legal de Mario); 12 correos Gmail de testers (los da Mario); prueba cerrada de 14 días con 12 testers antes de pedir producción (regla de Google para cuentas personales).
+- Qué sigue: subir el .aab a la versión de Alpha, agregar testers, enviar a revisión (clic de Mario).
