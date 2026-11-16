@@ -470,3 +470,8 @@ dominios propios de la app iOS → el revisor habría salido a Safari. Agregado 
   verifica 200 en app.litasupport.com, assetlinks.json, /privacidad y el portal demo
   (regla 10). Falla en rojo = correo de GitHub a Mario.
 - Solicitud de distribución no listada ENVIADA 13 nov (Apple: "Thank you for your submission"); 2 organizaciones, 50 usuarios (25 VK + 25 CDJ), dispositivos no administrados, MEX/USA/VEN. Irreversible una vez aprobada. Respuesta de Apple a mario_zumaran@hotmail.com.
+
+### 2026-11-15 — Google Play: app creada
+- Play Console: teléfonos verificados (Mario dio el código), app "LiTa Support" creada (id 4974144834836856800, paquete support.lita.app, gratis).
+- Declaraciones cargadas: privacidad (litasupport.com/privacidad), sin anuncios, sin ID de publicidad, no gubernamental, sin funciones financieras ni de salud.
+- Recursos de ficha en `tienda/` (ícono 512, gráfico 1024×500, 2 capturas 1080×1920) servidos por Pages para subirlos a Play.
