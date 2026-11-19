@@ -487,3 +487,12 @@ dominios propios de la app iOS → el revisor habría salido a Safari. Agregado 
 - 15 nov 19:30: Mario envió los 14 cambios a revisión (prueba cerrada Alpha + ficha + contenido de la app); Google corre verificaciones rápidas y luego los manda solo a revisión.
 - Bloqueadores abiertos: 11 correos Gmail más de testers (los da Mario); prueba cerrada de 14 días con 12 testers antes de pedir producción (regla de Google para cuentas personales).
 - Qué sigue: completar los 12 testers, que acepten la invitación e instalen; contar 14 días; luego pedir acceso a producción.
+
+### 2026-11-19 — iOS: LiTa Support 1.0 aprobada y publicada
+- Apple aprobó la versión 1.0 (appStoreVersion `8aba1e7a-…`, estado `PENDING_DEVELOPER_RELEASE`).
+- Mario confirmó en la sesión ("Sí, publícala", 19-nov 15:21). Se lanzó con `POST /v1/appStoreVersionReleaseRequests` (HTTP 201) y el estado verificado después es `READY_FOR_SALE`.
+- Liga: https://apps.apple.com/app/id6834486679. Puede tardar unas horas en verse en la tienda.
+- SIN VERIFICAR: si Apple aprobó la distribución no listada. La respuesta llega a mario_zumaran@hotmail.com, correo al que esta sesión no tiene acceso. Si no la aprobaron, la app es pública en búsquedas.
+- Qué sigue:
+  - La 1.0 salió con el build 4, que trae el **ícono anterior**. Subir el build con el ícono de LiTa (3 cuadros + punto ocre) como 1.0.1.
+  - Google Play: prueba cerrada en revisión; faltan 11 testers.
