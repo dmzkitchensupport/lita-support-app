@@ -500,3 +500,11 @@ dominios propios de la app iOS → el revisor habría salido a Safari. Agregado 
 - Mario pidió mandar la versión con el ícono nuevo ("SI", 19-nov 15:23).
 - `ios/project.yml`: `MARKETING_VERSION` 1.0 → 1.0.1. La línea de builds 1.0 quedó cerrada al publicar la 1.0, así que el build 5 (ícono nuevo, 1.0) ya no se puede usar.
 - Al fusionar a `main`, `build-ios.yml` compila y sube el build nuevo. Después se crea la versión 1.0.1 en App Store Connect con ese build y se manda a revisión.
+
+### 2026-11-19 — iOS: al abrir la app se abría Stripe en Safari (fix para la 1.0.1)
+- **Reporte de Mario** con la 1.0 recién publicada: al abrir la app se abre Stripe. También reportó que no ve el ícono de LiTa.
+- **Ícono:** la 1.0 (build 4) salió con el ícono provisional "LS", verificado contra el ícono público de la tienda. La 1.0.1 lleva el ícono de LiTa.
+- **Stripe:**
+  - Causa: `portal.html` de CDJ carga `<script src="https://js.stripe.com/v3/">`, que crea iframes ocultos. `decidePolicyFor` en `LiTaApp.swift` mandaba a Safari cualquier navegación a un dominio no propio, también la de esos iframes.
+  - Fix: solo la navegación del marco principal sale de la app; los iframes de terceros se cancelan en silencio. Un enlace de pago que el usuario toca sigue abriéndose fuera.
+- **Verificación:** SIN VERIFICAR en dispositivo. Esta sesión no compila Swift; lo compila `build-ios.yml` en macOS al fusionar. La 1.0.1 debe enviarse con el build que incluya este fix.

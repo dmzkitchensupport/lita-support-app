@@ -137,6 +137,14 @@ struct VistaWeb: UIViewRepresentable {
             if (esquema == "https" && esPropio(url)) {
                 return decisionHandler(.allow)
             }
+            // Fix 19-nov-2026: los iframes ocultos de terceros (p. ej. js.stripe.com, que el portal
+            // de CDJ carga al abrir) también pasan por aquí. Antes se abrían en Safari y al abrir la
+            // app aparecía una página de Stripe. Solo la navegación principal sale de la app; un
+            // iframe externo se ignora en silencio.
+            let esPrincipal = action.targetFrame?.isMainFrame ?? true
+            if !esPrincipal {
+                return decisionHandler(.cancel)
+            }
             // Correo, teléfono, WhatsApp y sitios externos: fuera de la app.
             UIApplication.shared.open(url)
             decisionHandler(.cancel)
