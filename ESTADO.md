@@ -487,3 +487,8 @@ dominios propios de la app iOS → el revisor habría salido a Safari. Agregado 
 - 15 nov 19:30: Mario envió los 14 cambios a revisión (prueba cerrada Alpha + ficha + contenido de la app); Google corre verificaciones rápidas y luego los manda solo a revisión.
 - Bloqueadores abiertos: 11 correos Gmail más de testers (los da Mario); prueba cerrada de 14 días con 12 testers antes de pedir producción (regla de Google para cuentas personales).
 - Qué sigue: completar los 12 testers, que acepten la invitación e instalen; contar 14 días; luego pedir acceso a producción.
+
+### 2026-11-19 — iOS 1.0.1 (ícono de LiTa)
+- Mario pidió mandar la versión con el ícono nuevo ("SI", 19-nov 15:23).
+- `ios/project.yml`: `MARKETING_VERSION` 1.0 → 1.0.1. La línea de builds 1.0 quedó cerrada al publicar la 1.0, así que el build 5 (ícono nuevo, 1.0) ya no se puede usar.
+- Al fusionar a `main`, `build-ios.yml` compila y sube el build nuevo. Después se crea la versión 1.0.1 en App Store Connect con ese build y se manda a revisión.
