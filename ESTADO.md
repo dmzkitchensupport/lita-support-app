@@ -496,3 +496,7 @@ dominios propios de la app iOS → el revisor habría salido a Safari. Agregado 
 - Qué sigue:
   - La 1.0 salió con el build 4, que trae el **ícono anterior**. Subir el build con el ícono de LiTa (3 cuadros + punto ocre) como 1.0.1.
   - Google Play: prueba cerrada en revisión; faltan 11 testers.
+### 2026-11-19 — iOS 1.0.1 (ícono de LiTa)
+- Mario pidió mandar la versión con el ícono nuevo ("SI", 19-nov 15:23).
+- `ios/project.yml`: `MARKETING_VERSION` 1.0 → 1.0.1. La línea de builds 1.0 quedó cerrada al publicar la 1.0, así que el build 5 (ícono nuevo, 1.0) ya no se puede usar.
+- Al fusionar a `main`, `build-ios.yml` compila y sube el build nuevo. Después se crea la versión 1.0.1 en App Store Connect con ese build y se manda a revisión.
