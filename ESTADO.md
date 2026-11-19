@@ -508,3 +508,12 @@ dominios propios de la app iOS → el revisor habría salido a Safari. Agregado 
   - Causa: `portal.html` de CDJ carga `<script src="https://js.stripe.com/v3/">`, que crea iframes ocultos. `decidePolicyFor` en `LiTaApp.swift` mandaba a Safari cualquier navegación a un dominio no propio, también la de esos iframes.
   - Fix: solo la navegación del marco principal sale de la app; los iframes de terceros se cancelan en silencio. Un enlace de pago que el usuario toca sigue abriéndose fuera.
 - **Verificación:** SIN VERIFICAR en dispositivo. Esta sesión no compila Swift; lo compila `build-ios.yml` en macOS al fusionar. La 1.0.1 debe enviarse con el build que incluya este fix.
+
+### 2026-11-19 16:05 — iOS 1.0.1 enviada a revisión de Apple
+- Build **7** (run 44621421566, commit `b1452da`): incluye el ícono de LiTa y el fix de iframes de Stripe. Estado `VALID`.
+- El build 6 (run 44618384633) **no se usó**: solo traía el cambio de versión, sin el fix.
+- appStoreVersion 1.0.1: `4085b5e6-f6db-4afa-b856-7872c96b4581`.
+  - `releaseType` AFTER_APPROVAL: se publica sola al aprobarse.
+  - whatsNew es-MX: "Nuevo ícono de LiTa Support. Corrige que al abrir la app se abriera una página externa."
+- reviewSubmission `c3abf7df-…` enviada (HTTP 200). Estado verificado después: **WAITING_FOR_REVIEW**.
+- Qué sigue: esperar la aprobación de Apple (1–2 días) y verificar en el iPhone de Mario que no se abra Stripe al entrar y que se vea el ícono de LiTa.
